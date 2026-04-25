@@ -6,15 +6,11 @@ from .commands.batch import add_batch_parser
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="enzywizard",
-        description="EnzyWizard: an integrated toolkit for enzyme analysis."
+        prog="enzywizard-batch",
+        description="EnzyWizard-Batch: Run a complete EnzyWizard analysis workflow from a cleaned protein structure and a matched MSA file."
     )
 
-    subparsers = parser.add_subparsers(dest="command", required=True)
-
-    add_batch_parser(subparsers)
-
-
+    add_batch_parser(parser)
     return parser
 
 

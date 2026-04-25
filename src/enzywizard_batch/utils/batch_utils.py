@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, List, Tuple
 
 from ..utils.logging_utils import Logger
 from ..utils.integrate_utils import save_integrate_json, split_integrated_graph_entries
 from ..utils.common_utils import get_optimized_filename
+from ..utils.structure_utils import get_single_chain
+from Bio.PDB.Structure import Structure
 
 
 def validate_batch_parameter_ranges(
@@ -209,3 +211,57 @@ def save_batch_integrate_outputs(
     logger.print(f"[INFO] Edge list JSON saved: {edges_path}")
 
     return True
+
+def build_identity_clean_mapping_from_structure(structure: Structure,logger: Logger) -> Tuple[List[Dict[str, Dict[str, Any]]], Dict[str, int]] | None:
+
+    chain = get_single_chain(structure, logger)
+    if chain is None:
+        return None
+
+    mapping_old_to_new: List[Dict[str, Dict[str, Any]]] = []
+
+    kept_residues = 0
+
+    for res in chain.get_residues():
+        hetflag, resseq, icode = res.id
+
+        # 跳过非蛋白
+        if str(hetflag).strip():
+            continue
+
+        resname = res.get_resname().strip()
+
+        h_count = sum(
+            1 for atom in res.get_atoms()
+            if atom.element and atom.element.strip().upper() == "H"
+        )
+
+        residue_info = {
+            "aa_index": int(resseq),
+            "aa_name": resname,
+            "hydrogen_atom_count": h_count,
+        }
+
+        mapping_old_to_new.append(
+            {
+                "old_residue": residue_info,
+                "new_residue": residue_info.copy(),  # identity mapping
+            }
+        )
+
+        kept_residues += 1
+
+    if kept_residues == 0:
+        logger.print("[ERROR] No valid protein residues found in structure.")
+        return None
+
+    stats = {
+        "removed_heterogen": 0,
+        "changed_resname": 0,
+        "fixed_residues": 0,
+        "added_heavy_atoms": 0,
+        "added_hydrogen_atoms": 0,
+        "kept_residues": kept_residues,
+    }
+
+    return mapping_old_to_new, stats

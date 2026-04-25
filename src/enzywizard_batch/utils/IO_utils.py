@@ -22,6 +22,8 @@ from Bio.PDB.Model import Model
 from Bio.PDB.Residue import Residue
 import copy
 import numpy as np
+from pdbfixer import PDBFixer
+import re
 
 
 
@@ -400,6 +402,100 @@ def save_substrate_structures(substrate_feature_list: List[Dict[str, Any]],outpu
         return False
 
 def write_protein_pdbqt(struct: Structure,pdbqt_path: str | Path,logger: Logger) -> bool:
+    def parse_meeko_bad_residues_from_stderr(stderr: str) -> Tuple[List[str], List[str]]:
+        direct_residue_set = set()
+        range_residue_set = set()
+
+        if not isinstance(stderr, str) or not stderr.strip():
+            return [], []
+
+        # Case 1:
+        # matched with excess inter-residue bond(s): A:39
+        for m in re.finditer(
+                r"matched with excess inter-residue bond\(s\):\s*([A-Za-z0-9_]*:\d+)",
+                stderr
+        ):
+            direct_residue_set.add(m.group(1))
+
+        # Case 2:
+        # No template matched for residue_key='A:836'
+        for m in re.finditer(
+                r"No template matched for residue_key='?([A-Za-z0-9_]*:\d+)'?",
+                stderr
+        ):
+            direct_residue_set.add(m.group(1))
+
+        # Case 3:
+        # Expected 2 paddings for (A:37, A:39)
+        for m in re.finditer(
+                r"Expected\s+\d+\s+paddings\s+for\s+\(([A-Za-z0-9_]*:\d+),\s*([A-Za-z0-9_]*:\d+)\)",
+                stderr
+        ):
+            res1 = m.group(1)
+            res2 = m.group(2)
+
+            chain1, num1_text = res1.split(":")
+            chain2, num2_text = res2.split(":")
+
+            try:
+                num1 = int(num1_text)
+                num2 = int(num2_text)
+            except Exception:
+                range_residue_set.add(res1)
+                range_residue_set.add(res2)
+                continue
+
+            if chain1 == chain2:
+                start = min(num1, num2)
+                end = max(num1, num2)
+
+                # 保守限制，避免一次删太大一段
+                if end - start <= 5:
+                    for n in range(start, end + 1):
+                        range_residue_set.add(f"{chain1}:{n}")
+                else:
+                    range_residue_set.add(res1)
+                    range_residue_set.add(res2)
+            else:
+                range_residue_set.add(res1)
+                range_residue_set.add(res2)
+
+        direct_residue_list = sorted(direct_residue_set)
+        range_residue_list = sorted(range_residue_set)
+
+        return direct_residue_list, range_residue_list
+
+    def build_meeko_delete_residues_text(residue_list: List[str]) -> str:
+        chain_to_resseq_list: Dict[str, List[int]] = {}
+
+        for item in residue_list:
+            if ":" not in item:
+                continue
+
+            chain_id, resseq_text = item.split(":", 1)
+
+            try:
+                resseq = int(resseq_text)
+            except Exception:
+                continue
+
+            if chain_id not in chain_to_resseq_list:
+                chain_to_resseq_list[chain_id] = []
+
+            chain_to_resseq_list[chain_id].append(resseq)
+
+        part_list: List[str] = []
+
+        for chain_id in sorted(chain_to_resseq_list.keys()):
+            unique_resseq_list = sorted(set(chain_to_resseq_list[chain_id]))
+            if len(unique_resseq_list) == 0:
+                continue
+
+            resseq_text = ",".join(str(x) for x in unique_resseq_list)
+            part_list.append(f"{chain_id}:{resseq_text}")
+
+        return ",".join(part_list)
+
     try:
         pdbqt_path = Path(pdbqt_path)
         pdbqt_path.parent.mkdir(parents=True, exist_ok=True)
@@ -429,6 +525,50 @@ def write_protein_pdbqt(struct: Structure,pdbqt_path: str | Path,logger: Logger)
             )
 
             if p.returncode != 0:
+                direct_residue_list, range_residue_list = parse_meeko_bad_residues_from_stderr(p.stderr)
+                if len(direct_residue_list) > 0:
+                    delete_text = build_meeko_delete_residues_text(direct_residue_list)
+                    p2 = subprocess.run(
+                        [
+                            "mk_prepare_receptor.py",
+                            "--read_pdb", str(tmp_pdb),
+                            "--write_pdbqt", str(pdbqt_path),
+                            "--allow_bad_res",
+                            "--delete_residues", str(delete_text)
+                        ],
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        text=True,
+                        check=False,
+                    )
+                    if p2.returncode == 0:
+                        if not pdbqt_path.exists() or pdbqt_path.stat().st_size <= 0:
+                            logger.print("[ERROR] Failed to generate PDBQT file.")
+                            return False
+                        return True
+
+                if len(range_residue_list) > 0:
+                    delete_text = build_meeko_delete_residues_text(range_residue_list)
+                    p3 = subprocess.run(
+                        [
+                            "mk_prepare_receptor.py",
+                            "--read_pdb", str(tmp_pdb),
+                            "--write_pdbqt", str(pdbqt_path),
+                            "--allow_bad_res",
+                            "--delete_residues", str(delete_text)
+                        ],
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        text=True,
+                        check=False,
+                    )
+                    if p3.returncode == 0:
+                        if not pdbqt_path.exists() or pdbqt_path.stat().st_size <= 0:
+                            logger.print("[ERROR] Failed to generate PDBQT file.")
+                            return False
+
+                        return True
+
                 logger.print("[ERROR] mk_prepare_receptor.py failed.")
                 return False
 
@@ -743,7 +883,12 @@ def load_substrate_name_and_mol_3d_list(substrate_names: str,substrate_dir: str 
     mol_3d_list: List[Chem.Mol] = []
 
     for substrate_name in substrate_name_list:
-        sdf_path = substrate_dir / f"{substrate_name}.sdf"
+        substrate_file_stem = get_optimized_filename(substrate_name)
+        if not substrate_file_stem:
+            logger.print(f"[ERROR] Invalid substrate filename generated from substrate: {substrate_name}")
+            return None
+
+        sdf_path = substrate_dir / f"{substrate_file_stem}.sdf"
 
         if not sdf_path.exists() or not sdf_path.is_file():
             logger.print(f"[ERROR] Substrate SDF not found: {sdf_path}")
@@ -757,3 +902,88 @@ def load_substrate_name_and_mol_3d_list(substrate_names: str,substrate_dir: str 
         mol_3d_list.append(mol_3d)
 
     return substrate_name_list, mol_3d_list
+
+def load_pdbfixer(path: str | Path,logger: Logger) -> PDBFixer | None:
+
+    p = Path(path)
+
+    try:
+        if not p.exists():
+            logger.print(f"[ERROR] File not found: {str(p)}")
+            return None
+
+        if p.stat().st_size == 0:
+            logger.print(f"[ERROR] File is empty: {str(p)}")
+            return None
+
+        suffix = p.suffix.lower()
+
+        if suffix not in {".pdb", ".cif", ".mmcif"}:
+            logger.print(f"[ERROR] Unsupported format: {str(p)}")
+            return None
+
+        fixer = PDBFixer(filename=str(p))
+
+        if fixer.topology is None:
+            logger.print(f"[ERROR] Failed to load topology: {str(p)}")
+            return None
+
+        return fixer
+
+    except Exception as e:
+        logger.print(f"[ERROR] Exception in loading PDBFixer for {str(p)}: {e}")
+        return None
+
+
+def write_cif_from_pdbfixer(fixer: PDBFixer, output_path: str | Path) -> None:
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(output_path, "w") as f:
+        PDBxFile.writeFile(
+            fixer.topology,
+            fixer.positions,
+            f,
+            keepIds=True
+        )
+
+def write_pdb_from_pdbfixer(fixer: PDBFixer, output_path: str | Path) -> None:
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(output_path, "w") as f:
+        PDBFile.writeFile(
+            fixer.topology,
+            fixer.positions,
+            f,
+            keepIds=True
+        )
+
+def pdbfixer_to_modeller(fixer: PDBFixer,logger: Logger) -> Modeller | None:
+
+    if fixer is None:
+        logger.print("[ERROR] fixer is None.")
+        return None
+
+    if not isinstance(fixer, PDBFixer):
+        logger.print("[ERROR] fixer must be a PDBFixer instance.")
+        return None
+
+    try:
+        topology = fixer.topology
+        positions = fixer.positions
+
+        if topology is None:
+            logger.print("[ERROR] fixer.topology is None.")
+            return None
+
+        if positions is None:
+            logger.print("[ERROR] fixer.positions is None.")
+            return None
+        modeller = Modeller(topology, positions)
+
+        return modeller
+
+    except Exception as e:
+        logger.print(f"[ERROR] Failed to convert PDBFixer to Modeller: {e}")
+        return None

@@ -1,0 +1,73 @@
+# STOCKHOLM 1.0
+#=GF ID 7RUT-i2
+#=GF AU jackhmmer (HMMER 3.4)
+
+#=GS sp|Q96EY8|MMAB_HUMAN/56-249 DE [subseq from] Corrinoid adenosyltransferase MMAB OS=Homo sapiens OX=9606 GN=MMAB PE=1 SV=1
+#=GS sp|Q9D273|MMAB_MOUSE/50-236 DE [subseq from] Corrinoid adenosyltransferase MMAB OS=Mus musculus OX=10090 GN=Mmab PE=1 SV=1
+#=GS sp|Q58D49|MMAB_BOVIN/50-239 DE [subseq from] Corrinoid adenosyltransferase MMAB OS=Bos taurus OX=9913 GN=MMAB PE=1 SV=1
+#=GS sp|P64804|PDUO_MYCBO/7-178  DE [subseq from] Corrinoid adenosyltransferase OS=Mycobacterium bovis (strain ATCC BAA-935 / AF2122/97) OX=233413 GN=BQ2027_MB1347C PE=3 SV=1
+#=GS sp|P9WP98|PDUO_MYCTO/7-178  DE [subseq from] Corrinoid adenosyltransferase OS=Mycobacterium tuberculosis (strain CDC 1551 / Oshkosh) OX=83331 GN=MT1354 PE=3 SV=1
+#=GS sp|P9WP99|PDUO_MYCTU/7-178  DE [subseq from] Corrinoid adenosyltransferase OS=Mycobacterium tuberculosis (strain ATCC 25618 / H37Rv) OX=83332 GN=Rv1314c PE=1 SV=1
+#=GS sp|B1VB74|PDUO_CITFR/3-180  DE [subseq from] Corrinoid adenosyltransferase PduO OS=Citrobacter freundii OX=546 GN=pduO PE=1 SV=1
+#=GS sp|P53523|PDUO_MYCLE/7-184  DE [subseq from] Corrinoid adenosyltransferase OS=Mycobacterium leprae (strain TN) OX=272631 GN=ML1149 PE=3 SV=1
+#=GS sp|Q8ZNR5|PDUO_SALTY/3-178  DE [subseq from] Corrinoid adenosyltransferase PduO OS=Salmonella typhimurium (strain LT2 / SGSC1412 / ATCC 700720) OX=99287 GN=pduO PE=1 SV=1
+#=GS sp|Q1LJ80|ATR_CUPMC/7-182   DE [subseq from] Cobalamin adenosyltransferase OS=Cupriavidus metallidurans (strain ATCC 43123 / DSM 2839 / NBRC 102507 / CH34) OX=266264 GN=cobO PE=1 SV=1
+#=GS sp|O34899|PDUO_BACSU/2-181  DE [subseq from] Corrinoid adenosyltransferase OS=Bacillus subtilis (strain 168) OX=224308 GN=yvqK PE=1 SV=2
+#=GS sp|P45515|ATR_CITFR/3-169   DE [subseq from] Corrinoid adenosyltransferase OS=Citrobacter freundii OX=546 PE=3 SV=1
+
+7RUT                                PKIYTKTGDKGFSSTFTGERRPKDDQVFEAVGTTDELSSAIGFAL-ELVTEKGH-TFAEELQK-IQCTL----QDVGSALATPCSSA--------T-----TFKA----GPILELEQWIDKYTSQLPPLTAFILPSGGKISSALHFCRAVCCRAERRVVPLVQM--GETDANV--AKFLNRLSDYLFTLARYAAMKEGNQ
+sp|Q96EY8|MMAB_HUMAN/56-249         PKIYTKTGDKGFSSTFTGERRPKDDQVFEAVGTTDELSSAIGFAL-ELVTEKGH-TFAEELQK-IQCTL----QDVGSALATPCSSAREA-HLKYT-----TFKA----GPILELEQWIDKYTSQLPPLTAFILPSGGKISSALHFCRAVCRRAERRVVPLVQM--GETDANV--AKFLNRLSDYLFTLARYAAMKEGNQ
+#=GR sp|Q96EY8|MMAB_HUMAN/56-249 PP 8********************************************.********.********.*****....************99777.77777.....****....*******************************************************..*******..*************************
+sp|Q9D273|MMAB_MOUSE/50-236         PKIYTKTGDKGFSSTFTGERRPKDDQVFEAVGTTDELSSAIGFAM-ELVTEKGH-MFAEELQK-IQCML----QDVGSALATPRSSAREA-HLKHT-----AFQE----GPVLELERWIDKYSSQLPPLKAFILPSGGKSSSALHFCRAVCRRAERRVVPLVQM--GETDANV--AKFLNRLSDYLFTVARYAAMKEGSQ
+#=GR sp|Q9D273|MMAB_MOUSE/50-236 PP 8********************************************.********.********.*****....************99777.77666.....999*....*******************************************************..*******..*************************
+sp|Q58D49|MMAB_BOVIN/50-239         PKIYTKTGDKGFSSTFTGERRSKDDQVFEAVGTTDELSSAIGFAM-ELIAEKGH-PFVEELQK-IQCSL----QDVGSALATPRSSAREA-HLKHA-----TFEA----GPILELEQWIDKYSRQLPPLTAFILPSGGKSSSALHFCRAVCRRAERRVVPLVQT--GETDANV--VKFLNRLSDYLFTLARYTAMKEGNP
+#=GR sp|Q58D49|MMAB_BOVIN/50-239 PP 8********************************************.********.********.*****....************99555.55545.....999*....*******************************************************..*******..*************************
+sp|P64804|PDUO_MYCBO/7-178          -RIYTRTGDDGTTGLSDMSRVAKTDARLVAYADCDEANAAIGAAL-ALGH-PDT-QITDVLRQ-IQNDL----FDAGADLSTPIVEN--------PKHPPLRIAQ----SYIDRLEGWCDAYNAGLPALKSFVLPGGSPLSALLHVARTVVRRAERSAWAAVDA--HPEGVSVLPAKYLNRLSDLLFILSRVAN---P--
+#=GR sp|P64804|PDUO_MYCBO/7-178  PP .8*******************************************.**98.***.********.*****....*************9........5555669***....*******************************************************..9998888779****************85...3..
+sp|P9WP98|PDUO_MYCTO/7-178          -RIYTRTGDDGTTGLSDMSRVAKTDARLVAYADCDEANAAIGAAL-ALGH-PDT-QITDVLRQ-IQNDL----FDAGADLSTPIVEN--------PKHPPLRIAQ----SYIDRLEGWCDAYNAGLPALKSFVLPGGSPLSALLHVARTVVRRAERSAWAAVDA--HPEGVSVLPAKYLNRLSDLLFILSRVAN---P--
+#=GR sp|P9WP98|PDUO_MYCTO/7-178  PP .8*******************************************.**98.***.********.*****....*************9........5555669***....*******************************************************..9998888779****************85...3..
+sp|P9WP99|PDUO_MYCTU/7-178          -RIYTRTGDDGTTGLSDMSRVAKTDARLVAYADCDEANAAIGAAL-ALGH-PDT-QITDVLRQ-IQNDL----FDAGADLSTPIVEN--------PKHPPLRIAQ----SYIDRLEGWCDAYNAGLPALKSFVLPGGSPLSALLHVARTVVRRAERSAWAAVDA--HPEGVSVLPAKYLNRLSDLLFILSRVAN---P--
+#=GR sp|P9WP99|PDUO_MYCTU/7-178  PP .8*******************************************.**98.***.********.*****....*************9........5555669***....*******************************************************..9998888779****************85...3..
+sp|B1VB74|PDUO_CITFR/3-180          --IYTRTGDAGTTALFTGQRVSKTHPRVEAYGTLDELNAALSLCV-CAA--KNP-QHRQLLEN-IQLQLFWFSAELASESEQPAPEQ--------R-----YISS----EEIAALEAAIDTAMGRVPPLRSFILPGRSEAASRLHFARTLARRAERRLVELSTE--ISVRHVL--MRYINRLSDCLYALARA-EDHDAHQ
+#=GR sp|B1VB74|PDUO_CITFR/3-180  PP ..9******************************************.**7..577.88888888.888885555799999********........*.....****....*******************************************************..*******..*****************.59*****
+sp|P53523|PDUO_MYCLE/7-184          -RIYTRTGDNGTTGLSDFSRVAKTDLRLVAYADCDETNSAIGVAL-ALGN-PDQ-KITDVLQQ-IQNDL----FDAGADLSTPMQDSVRNPEYPQL-----RITQ----THIDRLEEWCDTYNTPLPTLNSFVLPGGSPLSALLHVARTVARRAERSAWAAVEAHPGVVSMLP--AKYLNRLSDLLFILSRVAN---TGN
+#=GR sp|P53523|PDUO_MYCLE/7-184  PP .8*******************************************.**86.***.********.*****....***********999665555444.....9999....******************************************************9334577788..*****************85...334
+sp|Q8ZNR5|PDUO_SALTY/3-178          --IYTRTGDAGTTSLFTGQRVSKTHPRVEAYGTLDELNAALSLCA-CAAADENHRTLLEAIQQQLFWFS----AELASDSEQPSPKQ--------R-----YISS----EEISALEAAIDRAMARVEPLHSFILPGRCEAASRLHFARTLARRAERRLVELATE--VNVRQVL--MRYINRLSDCLYALARAE-DSDAHQ
+#=GR sp|Q8ZNR5|PDUO_SALTY/3-178  PP ..9******************************************.**999998788888876699999....**************........*.....****....*******************************************************..*******..*****************5.899999
+sp|Q1LJ80|ATR_CUPMC/7-182           -KIATRTGDAGTTGLGDGSRVGKNSLRIVAIGDVDELNSHIGLLL-TE-PDLPE-DVRAALLH-IQHDL----FDLGGELSIPG--Y--------T-----LLKA----PQVAQLDDWLAHYNAALPRLAEFILPGGSRPAAQAHICRTVCRRAERALVELGAA--EALNEAP--RQYLNRLSDLLFVLARVLNRAGGGS
+#=GR sp|Q1LJ80|ATR_CUPMC/7-182   PP .8*******************************************.*9.78***.********.*****....**********9..8........8.....****....*******************************************************..*******..*************************
+sp|O34899|PDUO_BACSU/2-181          -KLYTKTGDKGQTGL-VGGRTDKDSLRVESYGTIDELNSFIGLALAELSGQPGFEDLTAELLT-IQHEL----FDCGGDLAIVTERK--------D----YKLTE----ESVSFLETRIDAYTAEAPELKKFILPGGSKCASLLHIARTITRRAERRVVALMKS--EEIHETV--LRYLNRLSDYFFAAARVVNARSGIG
+#=GR sp|O34899|PDUO_BACSU/2-181  PP .89***********5.688*************************966777888779*******.*****....**********9887........5....37789....9******************************************************..*******..*************************
+sp|P45515|ATR_CITFR/3-169           -RIYTRTGDNGTTALFGGSRIDKDDIRVEAYGTVDELISQLGVCY-AST--RQA-ELRQELHA-MQKML----FVLGAELASDQKGL--------T-----RLKQRIGEEDIQALEQLIDRNMAQSGPLKEFVIPGKNLASAQLHVARTLTRRLERILIAMGRT--LTLRDEA--RRYINRLSDALFSMARIEE------
+#=GR sp|P45515|ATR_CITFR/3-169   PP .8*******************************************.*94..79*.********.*****....*************9........8.....777533338******************************************************..*******..*****************75......
+#=GC PP_cons                        89*******************************************.**889999.*******9.*****....************99........6.....9999....*******************************************************..9999999..*****************97***799
+#=GC RF                             xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.xxxxxxxx.xxxxxxxx.xxxxx....xxxxxxxxxxxxxx........x.....xxxx....xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx..xxxxxxx..xxxxxxxxxxxxxxxxxxxxxxxxx
+
+7RUT                                EKIYMKNDPSAESEG
+sp|Q96EY8|MMAB_HUMAN/56-249         EKIYMKNDPSAESEG
+#=GR sp|Q96EY8|MMAB_HUMAN/56-249 PP *************97
+sp|Q9D273|MMAB_MOUSE/50-236         EKIYKKHD-------
+#=GR sp|Q9D273|MMAB_MOUSE/50-236 PP ******99.......
+sp|Q58D49|MMAB_BOVIN/50-239         EKIYKKNDLSD----
+#=GR sp|Q58D49|MMAB_BOVIN/50-239 PP ********985....
+sp|P64804|PDUO_MYCBO/7-178          ---------------
+#=GR sp|P64804|PDUO_MYCBO/7-178  PP ...............
+sp|P9WP98|PDUO_MYCTO/7-178          ---------------
+#=GR sp|P9WP98|PDUO_MYCTO/7-178  PP ...............
+sp|P9WP99|PDUO_MYCTU/7-178          ---------------
+#=GR sp|P9WP99|PDUO_MYCTU/7-178  PP ...............
+sp|B1VB74|PDUO_CITFR/3-180          NNIIQKV--------
+#=GR sp|B1VB74|PDUO_CITFR/3-180  PP ***9975........
+sp|P53523|PDUO_MYCLE/7-184          D--------------
+#=GR sp|P53523|PDUO_MYCLE/7-184  PP 4..............
+sp|Q8ZNR5|PDUO_SALTY/3-178          ANIIR----------
+#=GR sp|Q8ZNR5|PDUO_SALTY/3-178  PP 88865..........
+sp|Q1LJ80|ATR_CUPMC/7-182           DVLWQRER-------
+#=GR sp|Q1LJ80|ATR_CUPMC/7-182   PP ****9875.......
+sp|O34899|PDUO_BACSU/2-181          DVEYERS--------
+#=GR sp|O34899|PDUO_BACSU/2-181  PP 9998865........
+sp|P45515|ATR_CITFR/3-169           ---------------
+#=GR sp|P45515|ATR_CITFR/3-169   PP ...............
+#=GC PP_cons                        9**99989998**97
+#=GC RF                             xxxxxxxxxxxxxxx
+//

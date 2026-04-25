@@ -5,7 +5,7 @@ from typing import Dict, Any
 from openmm.app import Modeller
 
 from ..utils.logging_utils import Logger
-from ..utils.batch_utils import build_batch_output_paths
+from ..utils.batch_utils import build_batch_output_paths, build_identity_clean_mapping_from_structure
 
 from ..utils.IO_utils import structure_to_pdbfile,load_dssp,load_msa,write_msa,write_hmm,save_substrate_structures,load_sdf_mol_3d
 
@@ -13,7 +13,7 @@ from ..utils.sequence_utils import check_msa, clean_msa_to_sto
 from ..utils.structure_utils import structure_has_hydrogen, get_fasta_dict_from_structure
 from ..utils.interaction_utils import filter_valid_docked_substrates
 
-from ..algorithms.clean_algorithms import clean_structure_to_single_chain_A,generate_clean_report,check_cleaned_structure,validate_clean_mapping_coordinates
+from ..algorithms.clean_algorithms import generate_clean_report,check_cleaned_structure
 
 from ..algorithms.aaprops_algorithms import calculate_aa_props,calculate_aa_props_statistics,generate_aaprops_report
 
@@ -120,15 +120,14 @@ def run_batch_workflow(
         logger.print("[ERROR] Input cleaned structure does not contain hydrogen atoms.")
         return None
 
-    clean_result = clean_structure_to_single_chain_A(original_structure, logger)
-    if clean_result is None:
+    mapping_old_to_new, clean_stats = build_identity_clean_mapping_from_structure(
+        original_structure,
+        logger
+    )
+    if mapping_old_to_new is None:
         return None
 
-    cleaned_structure, mapping_old_to_new, clean_stats = clean_result
-
-
-    if not validate_clean_mapping_coordinates(original_structure, cleaned_structure, mapping_old_to_new, logger):
-        return None
+    cleaned_structure = original_structure
 
     clean_report = generate_clean_report(
         original_structure,
@@ -184,10 +183,6 @@ def run_batch_workflow(
     report_dict["enzywizard_hydrocluster"] = hydrocluster_report
 
     logger.print("[INFO] Energy calculation started")
-    cleaned_pdbfile = structure_to_pdbfile(cleaned_structure, logger, protein_name=protein_name)
-    if cleaned_pdbfile is None:
-        return None
-
     energy_terms = compute_energy_terms(
         struct=cleaned_pdbfile,
         logger=logger,

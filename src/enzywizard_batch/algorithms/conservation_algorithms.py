@@ -204,7 +204,7 @@ def compute_conservation_scores(hmm_file: str | Path, sequence_dict: Dict[str,st
                 "aa_name": normalize_aa_name_to_one_letter(aa_name.upper()),
                 "hmm_emission_log_score": raw_score_dict.get(query_aa),
                 "emission_probability": float(emission_prob_dict[query_aa]),
-                "conservation_score": float(entropy),
+                "conservation_score": float((math.log(20.0) - entropy) / math.log(20.0)),
             })
 
         return result_list

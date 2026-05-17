@@ -244,3 +244,46 @@ def renumber_single_chain_fixer_residues(
     except Exception as e:
         logger.print(f"[ERROR] Exception in renumbering fixer residues: {e}")
         return None
+
+def postprocess_clean_report_to_schema(raw_report: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Map the original EnzyWizard-Clean raw report to the new schema-compliant report.
+    """
+
+    residue_mapping_old_to_new: List[Dict[str, Dict[str, Any]]] = []
+
+    for mapping_item in raw_report.get("amino_acid_mapping_old_to_new", []):
+        old_residue = mapping_item.get("old_residue", {})
+        new_residue = mapping_item.get("new_residue", {})
+
+        residue_mapping_old_to_new.append(
+            {
+                "old_residue": {
+                    "residue_index": old_residue.get("aa_id"),
+                    "residue_name": old_residue.get("aa_name"),
+                    "hydrogen_atom_count": old_residue.get("hydrogen_atom_count"),
+                },
+                "new_residue": {
+                    "residue_index": new_residue.get("aa_id"),
+                    "residue_name": new_residue.get("aa_name"),
+                    "hydrogen_atom_count": new_residue.get("hydrogen_atom_count"),
+                },
+            }
+        )
+
+    raw_statistics = raw_report.get("clean_statistics", {})
+
+    schema_report: Dict[str, Any] = {
+        "report_type": raw_report.get("output_type", "enzywizard_clean"),
+        "residue_mapping_old_to_new": residue_mapping_old_to_new,
+        "clean_statistics": {
+            "removed_heterogen_count": raw_statistics.get("removed_heterogen"),
+            "standardized_residue_name_count": raw_statistics.get("changed_resname"),
+            "repaired_residue_count": raw_statistics.get("fixed_residues"),
+            "added_heavy_atom_count": raw_statistics.get("added_heavy_atoms"),
+            "added_hydrogen_atom_count": raw_statistics.get("added_hydrogen_atoms"),
+            "retained_residue_count": raw_statistics.get("kept_residues"),
+        },
+    }
+
+    return schema_report

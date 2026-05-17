@@ -285,3 +285,46 @@ def add_clusters(g: nx.DiGraph) -> List[Cluster]:
         ))
 
     return clusters
+
+
+def postprocess_hydrocluster_report_to_schema(
+    raw_report: Dict[str, Any],
+) -> Dict[str, Any]:
+    """
+    Postprocess the raw EnzyWizard-Hydrocluster report into the new JSON Schema format.
+    """
+
+    raw_statistics = raw_report.get("hydrophobic_cluster_statistics", {})
+    raw_clusters = raw_report.get("hydrophobic_cluster", [])
+
+    hydrophobic_clusters: List[Dict[str, Any]] = []
+
+    for raw_cluster in raw_clusters:
+        residues: List[Dict[str, Any]] = []
+
+        for raw_residue in raw_cluster.get("residues", []):
+            residues.append(
+                {
+                    "residue_index": raw_residue.get("aa_id"),
+                    "residue_name": raw_residue.get("aa_name"),
+                }
+            )
+
+        hydrophobic_clusters.append(
+            {
+                "hydrophobic_cluster_area": raw_cluster.get("area"),
+                "residues": residues,
+            }
+        )
+
+    schema_report: Dict[str, Any] = {
+        "report_type": raw_report.get("output_type", "enzywizard_hydrocluster"),
+        "hydrophobic_cluster_statistics": {
+            "hydrophobic_cluster_count": raw_statistics.get("cluster_num"),
+            "max_hydrophobic_cluster_area": raw_statistics.get("max_cluster_area"),
+            "total_hydrophobic_cluster_area": raw_statistics.get("total_cluster_area"),
+        },
+        "hydrophobic_clusters": hydrophobic_clusters,
+    }
+
+    return schema_report

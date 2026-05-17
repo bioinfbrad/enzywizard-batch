@@ -329,11 +329,83 @@ def calculate_pocket_statistics(pocket_regions: List[Dict[str, Any]]) -> Dict[st
     }
 
 
-def generate_pocket_report(pocket_regions: List[Dict[str, Any]]) -> Dict[str, Any]:
+def postprocess_pocket_report_to_schema(
+    raw_report: Dict[str, Any],
+) -> Dict[str, Any] | None:
+    """
+    Postprocess the raw EnzyWizard-Pocket report into the official JSON Schema field names.
+
+    """
+
+    if not isinstance(raw_report, dict):
+        return None
+
+    try:
+        raw_statistics = raw_report.get("pocket_region_statistics")
+        if not isinstance(raw_statistics, dict):
+            return None
+
+        raw_pocket_regions = raw_report.get("pocket_regions")
+        if not isinstance(raw_pocket_regions, list):
+            return None
+
+        binding_pockets: List[Dict[str, Any]] = []
+
+        for raw_pocket in raw_pocket_regions:
+            if not isinstance(raw_pocket, dict):
+                return None
+
+            raw_residues = raw_pocket.get("residues")
+            if not isinstance(raw_residues, list):
+                return None
+
+            residues: List[Dict[str, Any]] = []
+
+            for raw_residue in raw_residues:
+                if not isinstance(raw_residue, dict):
+                    return None
+
+                residues.append(
+                    {
+                        "residue_index": raw_residue.get("aa_id"),
+                        "residue_name": raw_residue.get("aa_name"),
+                    }
+                )
+
+            binding_pockets.append(
+                {
+                    "binding_pocket_volume": raw_pocket.get("volume"),
+                    "binding_pocket_sphere_count": raw_pocket.get("n_spheres"),
+                    "residues": residues,
+                    "binding_pocket_center_coordinate": raw_pocket.get("pocket_center_coord"),
+                    "binding_pocket_box_size": raw_pocket.get("pocket_box_boundaries"),
+                }
+            )
+
+        schema_report: Dict[str, Any] = {
+            "report_type": raw_report.get("output_type"),
+            "binding_pocket_statistics": {
+                "binding_pocket_count": raw_statistics.get("pocket_num"),
+                "max_binding_pocket_volume": raw_statistics.get("max_pocket_volume"),
+                "total_binding_pocket_volume": raw_statistics.get("total_pocket_volume"),
+            },
+            "binding_pockets": binding_pockets,
+        }
+
+        return schema_report
+
+    except Exception:
+        return None
+
+def generate_pocket_report(
+    pocket_regions: List[Dict[str, Any]],
+) -> Dict[str, Any] | None:
     pocket_region_statistics = calculate_pocket_statistics(pocket_regions)
 
-    return {
+    raw_report = {
         "output_type": "enzywizard_pocket",
         "pocket_region_statistics": pocket_region_statistics,
         "pocket_regions": pocket_regions,
     }
+
+    return postprocess_pocket_report_to_schema(raw_report)

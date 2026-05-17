@@ -4,7 +4,7 @@ from typing import Dict, List, Any, Optional
 import torch
 from Bio.Data.IUPACData import protein_letters_1to3
 from ..utils.logging_utils import Logger
-from ..utils.embedding_utils import load_esm2
+from ..utils.embedding_utils import load_esm2, postprocess_embedding_report_to_schema
 from ..utils.sequence_utils import  normalize_aa_name_to_one_letter
 
 def generate_embedding(sequence_dict: Dict[str, str],logger: Logger, model_name: str = "esm2_t6_8M_UR50D", device: Optional[str] = None) -> List[Dict[str, Any]] | None:
@@ -86,9 +86,10 @@ def generate_embedding(sequence_dict: Dict[str, str],logger: Logger, model_name:
 
     return result
 
-def generate_embedding_report(embeddings: List[Dict[str,Any]]) -> dict:
-
-    return {
+def generate_embedding_report(embeddings: List[Dict[str, Any]]) -> dict | None:
+    raw_report = {
         "output_type": "enzywizard_embedding",
-        "embeddings": embeddings
+        "embeddings": embeddings,
     }
+
+    return postprocess_embedding_report_to_schema(raw_report)

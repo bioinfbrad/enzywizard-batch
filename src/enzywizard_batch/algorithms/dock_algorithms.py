@@ -7,7 +7,7 @@ from itertools import product
 from rdkit import Chem
 
 from vina import Vina
-from ..utils.dock_utils import split_vina_pose_string, get_sdf_atom_info_from_mol, get_pdbqt_index_mapping, get_pose_for_substrate_atom_info
+from ..utils.dock_utils import split_vina_pose_string, get_sdf_atom_info_from_mol, get_pdbqt_index_mapping, get_pose_for_substrate_atom_info, postprocess_dock_report_to_schema
 from ..utils.IO_utils import load_sdf_mol_3d, write_protein_pdbqt,write_substrate_pdbqt_from_sdf, write_docked_sdf_from_atom_info, write_docked_complex_from_mol_list
 from Bio.PDB.Structure import Structure
 from ..utils.logging_utils import Logger
@@ -684,10 +684,14 @@ def save_docking_results_and_generate_dock_report(
             "docked_substrates": ligand_report_list,
         }
 
-        return {
+        raw_report = {
             "output_type": "enzywizard_dock",
             "docked_result": best_report,
         }
+
+        schema_report = postprocess_dock_report_to_schema(raw_report)
+
+        return schema_report
 
     except Exception as e:
         import traceback

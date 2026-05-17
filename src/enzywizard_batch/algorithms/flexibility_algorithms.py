@@ -88,10 +88,37 @@ def compute_protein_rmsf(struct: Structure, logger: Logger, cutoff: float = 15.0
 
     return results
 
-def generate_flexibility_report(protein_rmsf: List[Dict[str,Any]]) -> dict:
+def postprocess_flexibility_report_to_schema(raw_report: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Postprocess the raw EnzyWizard-Flexibility report into the new JSON Schema format.
 
-    return {
-        "output_type": "enzywizard_flexibility",
-        "protein_rmsf": protein_rmsf
+    """
+
+    protein_rmsf = raw_report.get("protein_rmsf", [])
+
+    protein_flexibility: List[Dict[str, Any]] = []
+
+    for residue_rmsf in protein_rmsf:
+        protein_flexibility.append(
+            {
+                "residue_index": residue_rmsf.get("aa_id"),
+                "residue_name": residue_rmsf.get("aa_name"),
+                "residue_root_mean_square_fluctuation": residue_rmsf.get("rmsf"),
+            }
+        )
+
+    schema_report: Dict[str, Any] = {
+        "report_type": raw_report.get("output_type", "enzywizard_flexibility"),
+        "protein_flexibility": protein_flexibility,
     }
 
+    return schema_report
+
+def generate_flexibility_report(protein_rmsf: List[Dict[str, Any]]) -> Dict[str, Any]:
+
+    raw_report: Dict[str, Any] = {
+        "output_type": "enzywizard_flexibility",
+        "protein_rmsf": protein_rmsf,
+    }
+
+    return postprocess_flexibility_report_to_schema(raw_report)

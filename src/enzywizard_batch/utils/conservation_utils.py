@@ -860,3 +860,37 @@ def clean_a3m(msa_list: List[Dict[str, str]], logger: Logger) -> List[Dict[str, 
         logger.print(f"[ERROR] Exception in clean_a3m: {e}")
         return None
 
+def postprocess_conservation_report_to_schema(
+    raw_report: Dict[str, Any],
+) -> Dict[str, Any] | None:
+    """
+    Postprocess the raw EnzyWizard-Conservation report into the official JSON Schema field names.
+    """
+
+    if not isinstance(raw_report, dict):
+        return None
+
+    raw_conservation_scores = raw_report.get("conservation_scores")
+    if not isinstance(raw_conservation_scores, list):
+        return None
+
+    sequence_conservation_scores: List[Dict[str, Any]] = []
+
+    for raw_item in raw_conservation_scores:
+        if not isinstance(raw_item, dict):
+            return None
+
+        sequence_conservation_scores.append(
+            {
+                "residue_index": raw_item.get("aa_id"),
+                "residue_name": raw_item.get("aa_name"),
+                "hmm_profile_raw_score": raw_item.get("hmm_emission_log_score"),
+                "normalized_emission_probability": raw_item.get("emission_probability"),
+                "normalized_shannon_information_content": raw_item.get("conservation_score"),
+            }
+        )
+
+    return {
+        "report_type": raw_report.get("output_type"),
+        "sequence_conservation_scores": sequence_conservation_scores,
+    }

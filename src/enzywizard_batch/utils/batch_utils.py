@@ -7,6 +7,7 @@ from ..utils.logging_utils import Logger
 from ..utils.integrate_utils import save_integrate_json, split_integrated_graph_entries
 from ..utils.common_utils import get_optimized_filename
 from ..utils.structure_utils import get_single_chain
+from ..utils.sequence_utils import normalize_aa_name_to_one_letter
 from Bio.PDB.Structure import Structure
 
 
@@ -238,7 +239,7 @@ def build_identity_clean_mapping_from_structure(structure: Structure,logger: Log
 
         residue_info = {
             "aa_index": int(resseq),
-            "aa_name": resname,
+            "aa_name": normalize_aa_name_to_one_letter(resname),
             "hydrogen_atom_count": h_count,
         }
 

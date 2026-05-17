@@ -5,7 +5,7 @@ from typing import List, Dict, Any
 from Bio.Data.IUPACData import protein_letters_3to1
 
 from ..utils.logging_utils import Logger
-from ..utils.conservation_utils import check_msa_sto,check_msa_aligned_fasta,check_msa_a3m, clean_sto,clean_aligned_fasta,clean_a3m, remove_a3m_insertions, is_all_gap
+from ..utils.conservation_utils import check_msa_sto,check_msa_aligned_fasta,check_msa_a3m, clean_sto,clean_aligned_fasta,clean_a3m, remove_a3m_insertions, is_all_gap, postprocess_conservation_report_to_schema
 
 def check_msa(path: str | Path, sequence_dict: Dict[str, str], msa_list: List[Dict[str, str]], logger: Logger) -> bool:
     p = Path(path)

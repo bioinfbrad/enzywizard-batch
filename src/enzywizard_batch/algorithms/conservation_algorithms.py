@@ -4,7 +4,7 @@ from typing import List, Dict, Any
 from pathlib import Path
 import math
 from Bio.Data.IUPACData import protein_letters_1to3
-from ..utils.sequence_utils import normalize_aa_name_to_one_letter
+from ..utils.sequence_utils import normalize_aa_name_to_one_letter, postprocess_conservation_report_to_schema
 
 
 def get_emission_probabilities_from_hmm(hmm_file: str | Path, logger: Logger) -> List[Dict[str, Any]] | None:
@@ -213,9 +213,10 @@ def compute_conservation_scores(hmm_file: str | Path, sequence_dict: Dict[str,st
         logger.print(f"[ERROR] Exception in compute_conservation_scores: {e}")
         return None
 
-def generate_conservation_report(conservation_scores: List[Dict[str, Any]]) -> dict:
-
-    return {
+def generate_conservation_report(conservation_scores: List[Dict[str, Any]]) -> dict | None:
+    raw_report = {
         "output_type": "enzywizard_conservation",
         "conservation_scores": conservation_scores,
     }
+
+    return postprocess_conservation_report_to_schema(raw_report)

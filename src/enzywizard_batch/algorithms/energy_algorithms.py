@@ -116,6 +116,30 @@ def compute_energy_terms(struct: PDBFile | PDBxFile, logger: Logger, minimize_en
 
     return result
 
+def postprocess_energy_report_to_schema(raw_report: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Postprocess the raw EnzyWizard-Energy report into the schema-compliant report.
+    """
+
+    raw_energy_terms = raw_report.get("energy_terms", {})
+
+    schema_report: Dict[str, Any] = {
+        "report_type": raw_report.get("output_type"),
+        "energy_terms": {
+            "total_potential_energy": raw_energy_terms.get("total_potential_energy"),
+            "harmonic_bond_potential_energy": raw_energy_terms.get("harmonic_bond_force"),
+            "harmonic_angle_potential_energy": raw_energy_terms.get("harmonic_angle_force"),
+            "custom_bond_potential_energy": raw_energy_terms.get("custom_bond_force"),
+            "custom_torsion_potential_energy": raw_energy_terms.get("custom_torsion_force"),
+            "custom_nonbonded_potential_energy": raw_energy_terms.get("custom_nonbonded_force"),
+            "nonbonded_potential_energy": raw_energy_terms.get("nonbonded_force"),
+            "periodic_torsion_potential_energy": raw_energy_terms.get("periodic_torsion_force"),
+            "cmap_torsion_potential_energy": raw_energy_terms.get("cmap_torsion_force"),
+        },
+    }
+
+    return schema_report
+
 def generate_energy_report(energy_terms: Dict[str, float],logger: Logger) -> Dict[str, Any] | None:
 
     if energy_terms is None or len(energy_terms) == 0:
@@ -126,7 +150,12 @@ def generate_energy_report(energy_terms: Dict[str, float],logger: Logger) -> Dic
         logger.print("[ERROR] Energy terms must be a dictionary.")
         return None
 
-    return {
+    raw_report = {
         "output_type": "enzywizard_energy",
         "energy_terms": energy_terms,
     }
+
+    return postprocess_energy_report_to_schema(
+        raw_report=raw_report
+    )
+

@@ -3,7 +3,7 @@ from Bio.PDB.Structure import Structure
 from ..utils.logging_utils import Logger
 from typing import Dict, List, Tuple, Optional, Union, Any
 from ..utils.structure_utils import get_single_chain, get_residues_by_chain
-from ..utils.aaprops_utils import get_dssp_fields
+from ..utils.aaprops_utils import get_dssp_fields, postprocess_aaprops_report_to_schema
 from Bio.PDB.DSSP import DSSP
 from Bio.Data.IUPACData import protein_letters_3to1
 from ..utils.common_utils import one_hot_vec_generator, multi_hot_vec_generator
@@ -103,10 +103,12 @@ def calculate_aa_props_statistics(aa_props_list: List[Dict[str, Any]], logger: L
 
 def generate_aaprops_report(aa_props: List[Dict[str,Any]], aa_props_statistics: Dict[str, Dict[str, int]]) -> dict:
 
-    return {
+    raw_report = {
         "output_type": "enzywizard_aaprops",
         "aa_props": aa_props,
         "aa_props_statistics": aa_props_statistics,
     }
+
+    return postprocess_aaprops_report_to_schema(raw_report)
 
 

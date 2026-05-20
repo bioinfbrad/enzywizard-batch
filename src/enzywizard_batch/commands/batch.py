@@ -33,6 +33,9 @@ def add_batch_parser(parser: ArgumentParser) -> None:
     parser.set_defaults(dock_early_stop=True)
     parser.add_argument("--dock_exhaustiveness",type=int,default=16,help="Exhaustiveness of AutoDock Vina search (default: 16).")
     parser.add_argument("--dock_cpu",type=int,default=0,help="Number of CPUs used by AutoDock Vina (default: 0).")
+    parser.add_argument("--dock_catalytic_residue",type=int,default=None,help="Cleaned protein residue index used as the docking box center. Requires '--box_size'. When this parameter is provided, PyVOL pocket detection is not used.")
+    parser.add_argument("--dock_catalytic_site_coord",default=None,help="Catalytic site center coordinate separated by ',' as 'x,y,z'. Requires '--box_size'. When this parameter is provided, PyVOL pocket detection is not used.")
+    parser.add_argument("--dock_box_size",default=None,help="Docking box size separated by ',' as 'x,y,z'. Required when '--catalytic_residue' or '--catalytic_site_coord' is provided.")
     parser.add_argument("--hbond_bonded_h_min_distance",type=float,default=0.8,help="Minimum bonded heavy atom-hydrogen distance used for hydrogen bond donor detection (default: 0.8).")
     parser.add_argument("--hbond_bonded_h_max_distance",type=float,default=1.3,help="Maximum bonded heavy atom-hydrogen distance used for hydrogen bond donor detection (default: 1.3).")
     parser.add_argument("--hbond_da_max_distance",type=float,default=3.9,help="Maximum donor-acceptor distance cutoff for hydrogen bond detection (default: 3.9).")
@@ -80,6 +83,9 @@ def run_batch(args: Namespace) -> None:
         dock_min_rad=args.pocket_min_rad,
         dock_max_rad=args.pocket_max_rad,
         dock_min_volume=args.pocket_min_volume,
+        dock_catalytic_residue=args.dock_catalytic_residue,
+        dock_catalytic_site_coord=args.dock_catalytic_site_coord,
+        dock_box_size=args.dock_box_size,
         bonded_h_min_distance_A=args.hbond_bonded_h_min_distance,
         bonded_h_max_distance_A=args.hbond_bonded_h_max_distance,
         da_max_distance_A=args.hbond_da_max_distance,
@@ -92,4 +98,3 @@ def run_batch(args: Namespace) -> None:
         ring_cation_angle_cutoff_deg=args.pication_angle_cutoff,
         ss_max_distance_A=args.ssbond_max_distance,
     )
-

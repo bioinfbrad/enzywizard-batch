@@ -33,6 +33,7 @@ def validate_batch_parameter_ranges(
     dock_min_rad: float = 1.8,
     dock_max_rad: float = 6.2,
     dock_min_volume: int = 50,
+    use_manual_docking_box: bool = False,
     bonded_h_min_distance_A: float = 0.8,
     bonded_h_max_distance_A: float = 1.3,
     da_max_distance_A: float = 3.9,
@@ -91,12 +92,19 @@ def validate_batch_parameter_ranges(
     if (
         max_docking_attempt_num <= 0 or max_docking_attempt_num > 100
         or exhaustiveness <= 0 or exhaustiveness > 64
-        or dock_min_rad < 1.2
+    ):
+        logger.print(
+            f"[ERROR] Invalid docking parameters. Require: max_docking_attempt_num (1–100), exhaustiveness (1–64)."
+        )
+        return False
+
+    if not use_manual_docking_box and (
+        dock_min_rad < 1.2
         or dock_min_volume <= 20
         or dock_min_rad >= dock_max_rad
     ):
         logger.print(
-            f"[ERROR] Invalid docking parameters. Require: max_docking_attempt_num (1–100), exhaustiveness (1–64), min_rad ≥ 1.2, max_rad > min_rad, min_volume > 20."
+            f"[ERROR] Invalid docking pocket parameters. Require: min_rad ≥ 1.2, max_rad > min_rad, min_volume > 20."
         )
         return False
 

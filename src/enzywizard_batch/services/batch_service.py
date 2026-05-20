@@ -3,12 +3,30 @@ from __future__ import annotations
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import shutil
+from typing import List
 
 from ..utils.logging_utils import Logger
 from ..utils.IO_utils import file_exists, get_stem, check_filename_length
 from ..utils.batch_utils import validate_batch_parameter_ranges, save_batch_integrate_outputs
 from ..algorithms.batch_algorithms import run_batch_workflow
 from ..utils.common_utils import get_optimized_filename
+
+
+def _parse_float_triplet(value: str, parameter_name: str, logger: Logger) -> List[float] | None:
+    if not isinstance(value, str) or not value.strip():
+        logger.print(f"[ERROR] {parameter_name} is empty.")
+        return None
+
+    part_list = [x.strip() for x in value.split(",")]
+    if len(part_list) != 3 or any(not x for x in part_list):
+        logger.print(f"[ERROR] {parameter_name} must contain exactly 3 values separated by ','.")
+        return None
+
+    try:
+        return [float(x) for x in part_list]
+    except Exception:
+        logger.print(f"[ERROR] {parameter_name} must contain numeric values.")
+        return None
 
 
 def run_batch_service(
@@ -42,6 +60,9 @@ def run_batch_service(
     dock_min_rad: float = 1.8,
     dock_max_rad: float = 6.2,
     dock_min_volume: int = 50,
+    dock_catalytic_residue: int | None = None,
+    dock_catalytic_site_coord: str | None = None,
+    dock_box_size: str | None = None,
     bonded_h_min_distance_A: float = 0.8,
     bonded_h_max_distance_A: float = 1.3,
     da_max_distance_A: float = 3.9,
@@ -77,6 +98,38 @@ def run_batch_service(
         logger.print(f"[INFO] Batch processing started: cleaned_input_path={cleaned_input_path}, input_msa={input_msa}, substrate_names={substrate_names}")
         if has_substrate:
             logger.print("[INFO] Substrate input detected. Full batch workflow will be executed.")
+
+        dock_catalytic_site_coord_text = str(dock_catalytic_site_coord).strip() if dock_catalytic_site_coord is not None else ""
+        dock_box_size_text = str(dock_box_size).strip() if dock_box_size is not None else ""
+        use_manual_docking_box = dock_catalytic_residue is not None or bool(dock_catalytic_site_coord_text)
+
+        if dock_catalytic_residue is not None and dock_catalytic_site_coord_text:
+            logger.print("[ERROR] --dock_catalytic_residue and --dock_catalytic_site_coord cannot be used together.")
+            return False
+
+        if use_manual_docking_box and not dock_box_size_text:
+            logger.print("[ERROR] --dock_box_size is required when --dock_catalytic_residue or --dock_catalytic_site_coord is provided.")
+            return False
+
+        dock_catalytic_site_coord_list: List[float] | None = None
+        dock_box_size_list: List[float] | None = None
+
+        if dock_catalytic_residue is not None and dock_catalytic_residue <= 0:
+            logger.print("[ERROR] --dock_catalytic_residue must be a positive integer aa_id.")
+            return False
+
+        if dock_catalytic_site_coord_text:
+            dock_catalytic_site_coord_list = _parse_float_triplet(dock_catalytic_site_coord_text, "--dock_catalytic_site_coord", logger)
+            if dock_catalytic_site_coord_list is None:
+                return False
+
+        if use_manual_docking_box:
+            dock_box_size_list = _parse_float_triplet(dock_box_size_text, "--dock_box_size", logger)
+            if dock_box_size_list is None:
+                return False
+            if any(x <= 0.0 for x in dock_box_size_list):
+                logger.print("[ERROR] --dock_box_size values must be positive.")
+                return False
 
         if not file_exists(cleaned_input_path):
             logger.print(f"[ERROR] Input cleaned protein file not found: {cleaned_input_path}")
@@ -118,6 +171,7 @@ def run_batch_service(
             dock_min_rad=dock_min_rad,
             dock_max_rad=dock_max_rad,
             dock_min_volume=dock_min_volume,
+            use_manual_docking_box=use_manual_docking_box,
             bonded_h_min_distance_A=bonded_h_min_distance_A,
             bonded_h_max_distance_A=bonded_h_max_distance_A,
             da_max_distance_A=da_max_distance_A,
@@ -167,6 +221,9 @@ def run_batch_service(
             dock_min_rad=dock_min_rad,
             dock_max_rad=dock_max_rad,
             dock_min_volume=dock_min_volume,
+            dock_catalytic_residue=dock_catalytic_residue,
+            dock_catalytic_site_coord_list=dock_catalytic_site_coord_list,
+            dock_box_size_list=dock_box_size_list,
             bonded_h_min_distance_A=bonded_h_min_distance_A,
             bonded_h_max_distance_A=bonded_h_max_distance_A,
             da_max_distance_A=da_max_distance_A,

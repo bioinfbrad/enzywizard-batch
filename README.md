@@ -61,6 +61,9 @@ If provided, the following additional workflows will be executed:
 - enzyme-substrate molecular interaction calculation
 - strict graph integration
 
+If substrate generation or docking fails, these additional workflows are skipped
+for the final integration and the program continues with the protein-only route.
+
 If not provided, substrate, docking, and enzyme-substrate molecular interaction steps
 will be skipped.
 
@@ -194,6 +197,43 @@ Default: 16.
 Optional.
 Number of CPUs used by AutoDock Vina.
 Default: 0.
+
+--dock_catalytic_residue
+Optional.
+Cleaned protein residue index used as the docking box center.
+
+Example:
+  121
+
+This parameter is an integer residue index from the cleaned single-chain protein
+structure. The CA atom coordinate of this residue is used as the docking box
+center. When this parameter is provided, --dock_box_size is required.
+This parameter cannot be used together with --dock_catalytic_site_coord.
+When this parameter is provided, the docking step does not use PyVOL pocket
+detection or the global docking box fallback to build Vina docking boxes.
+
+--dock_catalytic_site_coord
+Optional.
+Catalytic site center coordinate separated by ','.
+
+Example:
+  12.5,8.0,-3.2
+
+When this parameter is provided, --dock_box_size is required.
+This parameter cannot be used together with --dock_catalytic_residue.
+When this parameter is provided, the docking step does not use PyVOL pocket
+detection or the global docking box fallback to build Vina docking boxes.
+
+--dock_box_size
+Optional.
+Docking box size separated by ','.
+
+Example:
+  20,20,20
+
+This parameter is required when --dock_catalytic_residue or
+--dock_catalytic_site_coord is provided. All three values must be positive
+numbers.
 
 --hbond_bonded_h_min_distance
 Optional.
@@ -893,15 +933,22 @@ This command processes the input cleaned structure and MSA as follows:
    - Generate substrate fingerprints and 3D conformers.
    - Save substrate structure files.
    - Generate the enzywizard_substrate report.
+   - If substrate parsing, SMILES completion, conformer generation, structure saving,
+     or report generation fails, log a warning and continue with the protein-only route.
 
 17. Optionally run docking analysis
-   - Dock generated substrate structures into predicted binding pockets.
+   - If --dock_catalytic_residue is provided, use the CA coordinate of that cleaned protein residue as the docking box center.
+   - If --dock_catalytic_site_coord is provided, use that coordinate as the docking box center.
+   - In either manual docking box mode, use --dock_box_size as the docking box size and skip docking-specific PyVOL pocket detection and the global docking box fallback.
+   - If no manual docking box parameter is provided, dock generated substrate structures into automatically generated pocket and global fallback docking boxes.
    - Save docking results.
    - Generate the enzywizard_dock report.
    - Load docked substrate structures for molecular interaction analysis.
+   - If docking, dock report generation, or docked substrate loading fails,
+     log a warning and continue with the protein-only route.
 
 18. Run molecular interaction analysis
-   - If substrate input is provided, filter valid docked substrates.
+   - If substrate input is provided and docking completed, filter valid docked substrates.
    - Calculate intra-enzyme molecular interactions.
    - Calculate enzyme-substrate molecular interactions when valid docked substrates exist.
    - Summarize molecular interaction counts.
@@ -909,8 +956,10 @@ This command processes the input cleaned structure and MSA as follows:
 
 19. Run graph integration
    - Collect all generated reports into report_dict.
-   - Use strict integration when substrate input is provided.
-   - Use non-strict integration when no substrate input is provided.
+   - Use strict integration when substrate input is provided and substrate/docking
+     workflows complete successfully.
+   - Use non-strict integration when no substrate input is provided or the workflow
+     falls back to the protein-only route.
    - Merge residue-level, substrate-level, and molecular interaction-level information
      into a unified integrated graph.
 

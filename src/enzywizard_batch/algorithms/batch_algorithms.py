@@ -320,7 +320,7 @@ def run_batch_workflow(
             fallback_to_no_substrate("Substrate feature or 3D structure generation failed.")
 
     if effective_has_substrate:
-        resolved_substrate_names = ",".join(item["substrate_name"] for item in substrate_dict_list)
+        resolved_substrate_names = ";".join(item["substrate_name"] for item in substrate_dict_list)
 
         if not save_substrate_structures(substrate_feature_list, output_dir, logger):
             fallback_to_no_substrate("Saving substrate structures failed.")

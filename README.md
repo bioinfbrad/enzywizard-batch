@@ -22,7 +22,7 @@ graph-based analysis, machine learning, and enzyme function studies.
 
 Example command:
 
-enzywizard-batch -i examples/input/cleaned_3GP6.cif -m examples/input/jhmm_3GP6.sto -s glucose,fructose -o examples/output/
+enzywizard-batch -i examples/input/cleaned_3GP6.cif -m examples/input/jhmm_3GP6.sto -s "glucose;fructose" -o examples/output/
 
 
 # input parameters:
@@ -52,7 +52,7 @@ The MSA must be generated using the cleaned protein FASTA sequence.
 Optional.
 Substrate names or SMILES strings.
 
-Multiple substrates should be separated by ','.
+Multiple substrates should be separated by ';'.
 
 If provided, the following additional workflows will be executed:
 - substrate feature generation

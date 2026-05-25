@@ -6,7 +6,7 @@ from ..services.batch_service import run_batch_service
 def add_batch_parser(parser: ArgumentParser) -> None:
     parser.add_argument("-i", "--cleaned_input_path",required=True,help="Path to input cleaned CIF/PDB file. The file needs to already be cleaned.")
     parser.add_argument("-m", "--input_msa",required=True,help="Path to input MSA file (STO/aligned FASTA/A3M format). The MSA file needs to be generated using the cleaned FASTA sequence.")
-    parser.add_argument("-s","--substrate_names",required=False,default=None,help="Optional substrate names or SMILES strings. Multiple substrates should be separated by ','. If not provided, substrate, dock, and protein-substrate interaction steps will be skipped.")
+    parser.add_argument("-s","--substrate_names",required=False,default=None,help="Optional substrate names or SMILES strings. Multiple substrates should be separated by ';'. If not provided, substrate, dock, and protein-substrate interaction steps will be skipped.")
     parser.add_argument("-o", "--output_dir",required=True,help="Path to output directory. If --save_extra_outputs is False, only final integrate JSON files and log.txt will be kept here.")
     parser.add_argument("--save_extra_outputs", dest="save_extra_outputs", action="store_true",help="Enable keeping extra output files such as HMM, substrate SDFs, docked SDFs, and complex CIF files (default: Disabled).")
     parser.set_defaults(save_extra_outputs=False)

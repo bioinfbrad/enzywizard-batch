@@ -1,10 +1,20 @@
 from __future__ import annotations
 
+import gzip
 from pathlib import Path
 from typing import List, Dict, Any
 import math
 
 from ..utils.logging_utils import Logger
+
+def is_fasta_gz_path(path: str | Path) -> bool:
+    return Path(path).name.lower().endswith(".fasta.gz")
+
+def open_text_or_fasta_gz(path: str | Path):
+    p = Path(path)
+    if is_fasta_gz_path(p):
+        return gzip.open(p, "rt", encoding="utf-8")
+    return p.open("r", encoding="utf-8")
 
 def remove_gaps(seq: str) -> str:
     return seq.replace("-", "").replace(".", "")
@@ -75,7 +85,7 @@ def load_msa_aligned_fasta(path: str | Path, logger: Logger) -> List[Dict[str, s
         current_header: str | None = None
         current_seq_parts: List[str] = []
 
-        with p.open("r", encoding="utf-8") as f:
+        with open_text_or_fasta_gz(p) as f:
             for raw_line in f:
                 line = raw_line.rstrip("\n").strip()
 

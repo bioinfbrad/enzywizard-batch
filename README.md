@@ -43,7 +43,7 @@ Path to the input MSA file.
 
 Supported MSA formats include:
 - Stockholm (.sto)
-- aligned FASTA
+- aligned FASTA (.fa / .fasta / .afa / .fasta.gz)
 - A3M
 
 The MSA must be generated using the cleaned protein FASTA sequence.
@@ -1026,6 +1026,7 @@ This command processes the input cleaned structure and MSA as follows:
 
 13. Run conservation analysis
    - Load and validate the input MSA.
+   - Automatically decompress the input MSA when the file is in .fasta.gz format.
    - Clean the MSA into Stockholm format.
    - Build an HMM profile.
    - Calculate residue-level conservation scores.

@@ -7,6 +7,9 @@ from Bio.Data.IUPACData import protein_letters_3to1
 from ..utils.logging_utils import Logger
 from ..utils.conservation_utils import check_msa_sto,check_msa_aligned_fasta,check_msa_a3m, clean_sto,clean_aligned_fasta,clean_a3m, remove_a3m_insertions, is_all_gap, postprocess_conservation_report_to_schema
 
+def is_fasta_gz_path(path: str | Path) -> bool:
+    return Path(path).name.lower().endswith(".fasta.gz")
+
 def check_msa(path: str | Path, sequence_dict: Dict[str, str], msa_list: List[Dict[str, str]], logger: Logger) -> bool:
     p = Path(path)
     query_sequence = sequence_dict.get("sequence",None)
@@ -17,7 +20,7 @@ def check_msa(path: str | Path, sequence_dict: Dict[str, str], msa_list: List[Di
         if suffix in {".sto", ".stockholm"}:
             return check_msa_sto(query_sequence, msa_list, logger)
 
-        elif suffix in {".fa", ".fasta", ".afa"}:
+        elif suffix in {".fa", ".fasta", ".afa"} or is_fasta_gz_path(p):
             return check_msa_aligned_fasta(query_sequence, msa_list, logger)
 
         elif suffix == ".a3m":
@@ -40,7 +43,7 @@ def clean_msa(path: str | Path, msa_list: List[Dict[str, str]], logger: Logger) 
         if suffix in {".sto", ".stockholm"}:
             return clean_sto(msa_list, logger)
 
-        elif suffix in {".fa", ".fasta", ".afa"}:
+        elif suffix in {".fa", ".fasta", ".afa"} or is_fasta_gz_path(p):
             return clean_aligned_fasta(msa_list, logger)
 
         elif suffix == ".a3m":

@@ -316,6 +316,54 @@ The program outputs the following files into the output directory:
 
      The "overall_statistics" object may contain:
 
+     - "sequence_length"
+       - Data type: integer
+       - Description: The field 'sequence_length' indicates the sequence length ('sequence length': http://edamontology.org/data_1249), measured as the number ('count': http://purl.obolibrary.org/obo/STATO_0000047) of amino acid residues ('residue': http://purl.obolibrary.org/obo/GENO_0000782) in the cleaned protein sequence ('protein sequence': http://edamontology.org/data_2976).
+
+     - "total_molecular_weight"
+       - Data type: number
+       - Description: The field 'total_molecular_weight' indicates the total molecular weight, calculated as the sum of residue molecular weights ('molecular weight': https://goldbook.iupac.org/terms/view/R05271) across the protein sequence ('protein sequence': http://edamontology.org/data_2976).
+
+     - "total_net_charge"
+       - Data type: number
+       - Description: The field 'total_net_charge' indicates the total net charge, calculated as the sum of residue electric charges ('electric charge': https://goldbook.iupac.org/terms/view/E01923) across the protein sequence ('protein sequence': http://edamontology.org/data_2976).
+
+     - "total_residue_volume"
+       - Data type: number
+       - Description: The field 'total_residue_volume' indicates the total residue volume ('volume': http://purl.obolibrary.org/obo/PATO_0000918), calculated as the sum of residue volumes across the protein sequence ('protein sequence': http://edamontology.org/data_2976).
+
+     - "max_3d_diameter"
+       - Data type: number
+       - Description: The field 'max_3d_diameter' indicates the maximum three-dimensional diameter ('diameter': http://purl.obolibrary.org/obo/PATO_0001334), calculated as the maximum pairwise distance ('distance': http://purl.obolibrary.org/obo/PATO_0000040) between residue alpha-carbon coordinates.
+
+     - "radius_of_gyration"
+       - Data type: number
+       - Description: The field 'radius_of_gyration' indicates the radius of gyration ('radius of gyration': https://goldbook.iupac.org/terms/view/R05121) calculated from residue alpha-carbon coordinates.
+
+     - "asphericity"
+       - Data type: number
+       - Description: The field 'asphericity' indicates the asphericity ('asphericity': https://www.rdkit.org/docs/source/rdkit.Chem.rdMolDescriptors.html) calculated from alpha-carbon coordinate covariance eigenvalues.
+
+     - "spherocity"
+       - Data type: number
+       - Description: The field 'spherocity' indicates the spherocity ('spherocity': https://www.rdkit.org/docs/source/rdkit.Chem.rdMolDescriptors.html) calculated from alpha-carbon coordinate covariance eigenvalues.
+
+     - "principal_moment_ratio"
+       - Data type: number
+       - Description: The field 'principal_moment_ratio' indicates the ratio of the largest to the smallest principal moments ('moment of inertia': https://goldbook.iupac.org/terms/view/M04006) calculated from alpha-carbon coordinate covariance eigenvalues.
+
+     - "bounding_box_volume"
+       - Data type: number
+       - Description: The field 'bounding_box_volume' indicates the volume ('volume': http://purl.obolibrary.org/obo/PATO_0000918) of the axis-aligned bounding box ('bounding box': https://developer.mozilla.org/en-US/docs/Glossary/Bounding_box) enclosing all residue alpha-carbon coordinates.
+
+     - "mean_pairwise_ca_distance"
+       - Data type: number
+       - Description: The field 'mean_pairwise_ca_distance' indicates the mean pairwise alpha-carbon distance ('distance': http://purl.obolibrary.org/obo/PATO_0000040) between residue alpha-carbon coordinates.
+
+     - "std_pairwise_ca_distance"
+       - Data type: number
+       - Description: The field 'std_pairwise_ca_distance' indicates the standard deviation ('standard deviation': http://purl.obolibrary.org/obo/STATO_0000237) of pairwise alpha-carbon distances ('distance': http://purl.obolibrary.org/obo/PATO_0000040) between residue alpha-carbon coordinates.
+
      - "residue_name_count"
        - Data type: array
        - Description: The field 'residue_name_count' indicates the count ('count': http://purl.obolibrary.org/obo/STATO_0000047) of residue names ('residue': http://purl.obolibrary.org/obo/GENO_0000782; 'name': http://xmlns.com/foaf/0.1/name), represented in the order of one-letter amino acid codes ('one-letter code': https://iupac.qmul.ac.uk/AminoAcid/A2021.html).
@@ -662,11 +710,11 @@ The program outputs the following files into the output directory:
 
      - "substrate_structure_spherocity"
        - Data type: number
-       - Description: The field 'substrate_structure_spherocity' indicates the spherocity index ('spherocity index': https://www.rdkit.org/docs/source/rdkit.Chem.rdMolDescriptors.html) of a possible molecular structure ('molecular structure': http://edamontology.org/data_0883) generated for the substrate ('substrate': https://purl.dsmz.de/schema/Substrate) calculated by RDKit software ('RDKit': https://www.rdkit.org/docs/index.html).
+       - Description: The field 'substrate_structure_spherocity' indicates the spherocity ('spherocity': https://www.rdkit.org/docs/source/rdkit.Chem.rdMolDescriptors.html) of a possible molecular structure ('molecular structure': http://edamontology.org/data_0883) generated for the substrate ('substrate': https://purl.dsmz.de/schema/Substrate) calculated by RDKit software ('RDKit': https://www.rdkit.org/docs/index.html).
 
      - "substrate_structure_principal_moment_ratio"
        - Data type: number
-       - Description: The field 'substrate_structure_principal_moment_ratio' indicates the ratio of the largest to the smallest principal moments of inertia ('moment of inertia': https://goldbook.iupac.org/terms/view/M03954) of a possible molecular structure ('molecular structure': http://edamontology.org/data_0883) generated for the substrate ('substrate': https://purl.dsmz.de/schema/Substrate).
+       - Description: The field 'substrate_structure_principal_moment_ratio' indicates the ratio of the largest to the smallest principal moments of inertia ('moment of inertia': https://goldbook.iupac.org/terms/view/M04006) of a possible molecular structure ('molecular structure': http://edamontology.org/data_0883) generated for the substrate ('substrate': https://purl.dsmz.de/schema/Substrate).
 
      - "substrate_structure_radius_of_gyration"
        - Data type: number
@@ -892,11 +940,11 @@ The program outputs the following files into the output directory:
 
    - "substrate_structure_spherocity"
      - Data type: number
-     - Description: The field 'substrate_structure_spherocity' indicates the spherocity index ('spherocity index': https://www.rdkit.org/docs/source/rdkit.Chem.rdMolDescriptors.html) of a possible molecular structure ('molecular structure': http://edamontology.org/data_0883) generated for the substrate ('substrate': https://purl.dsmz.de/schema/Substrate) calculated by RDKit software ('RDKit': https://www.rdkit.org/docs/index.html).
+     - Description: The field 'substrate_structure_spherocity' indicates the spherocity ('spherocity': https://www.rdkit.org/docs/source/rdkit.Chem.rdMolDescriptors.html) of a possible molecular structure ('molecular structure': http://edamontology.org/data_0883) generated for the substrate ('substrate': https://purl.dsmz.de/schema/Substrate) calculated by RDKit software ('RDKit': https://www.rdkit.org/docs/index.html).
 
    - "substrate_structure_principal_moment_ratio"
      - Data type: number
-     - Description: The field 'substrate_structure_principal_moment_ratio' indicates the ratio of the largest to the smallest principal moments of inertia ('moment of inertia': https://goldbook.iupac.org/terms/view/M03954) of a possible molecular structure ('molecular structure': http://edamontology.org/data_0883) generated for the substrate ('substrate': https://purl.dsmz.de/schema/Substrate).
+     - Description: The field 'substrate_structure_principal_moment_ratio' indicates the ratio of the largest to the smallest principal moments of inertia ('moment of inertia': https://goldbook.iupac.org/terms/view/M04006) of a possible molecular structure ('molecular structure': http://edamontology.org/data_0883) generated for the substrate ('substrate': https://purl.dsmz.de/schema/Substrate).
 
    - "substrate_structure_radius_of_gyration"
      - Data type: number

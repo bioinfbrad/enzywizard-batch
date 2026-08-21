@@ -7,13 +7,13 @@ from itertools import product
 from rdkit import Chem
 
 from vina import Vina
-from ..utils.dock_utils import split_vina_pose_string, get_sdf_atom_info_from_mol, get_pdbqt_index_mapping, get_pose_for_substrate_atom_info, postprocess_dock_report_to_schema
+from ..utils.dock_utils import split_vina_pose_string, get_sdf_atom_info_from_mol, get_pdbqt_index_mapping, get_pose_for_substrate_atom_info
 from ..utils.IO_utils import load_sdf_mol_3d, write_protein_pdbqt,write_substrate_pdbqt_from_sdf, write_docked_sdf_from_atom_info, write_docked_complex_from_mol_list
 from Bio.PDB.Structure import Structure
 from ..utils.logging_utils import Logger
 from ..algorithms.pocket_algorithms import compute_pockets
 from ..utils.structure_utils import get_structure_box, get_residue_ca_coord_by_aa_id
-from ..utils.dock_utils import get_substrate_sdf_path_group_dict, compute_ligand_centroid, remove_hydrogens_from_structure
+from ..utils.dock_utils import get_substrate_sdf_path_group_dict, compute_ligand_centroid, remove_hydrogens_from_structure, postprocess_dock_report_to_schema
 from ..utils.common_utils import get_optimized_filename
 
 VINA_SEED=202602
@@ -27,7 +27,7 @@ def dock_multiple_ligands_with_vina(
     box_center_list: List[float],
     box_size_list: List[float],
     logger: Logger,
-    exhaustiveness: int = 16,
+    exhaustiveness: int = 8,
     cpu: int = 0,
     max_pose_read_num: int = 1
 ) -> List[Dict[str, Any]] | None:
@@ -97,8 +97,8 @@ def dock_multiple_ligands_with_vina(
     try:
         box_center = [float(box_center_list[0]), float(box_center_list[1]), float(box_center_list[2])]
         box_size = [float(box_size_list[0]), float(box_size_list[1]), float(box_size_list[2])]
-    except Exception:
-        logger.print("[ERROR] box_center_list and box_size_list must contain numeric values.")
+    except Exception as e:
+        logger.print(f"[ERROR] box_center_list and box_size_list must contain numeric values. Reason: {e}")
         return None
 
     if box_size[0] <= 0.0 or box_size[1] <= 0.0 or box_size[2] <= 0.0:
@@ -165,8 +165,8 @@ def dock_multiple_ligands_with_vina(
             mapping_info_list_list.append(mapping_info_list)
             ligand_pdbqt_str_list.append(str(ligand_pdbqt_path))
 
-    except Exception:
-        logger.print("[ERROR] Failed during ligand input preparation.")
+    except Exception as e:
+        logger.print(f"[ERROR] Failed during ligand input preparation. Reason: {e}")
         return None
 
     try:
@@ -178,21 +178,21 @@ def dock_multiple_ligands_with_vina(
         v.compute_vina_maps(center=box_center, box_size=box_size)
         v.dock(exhaustiveness=exhaustiveness, n_poses=max_pose_read_num)
 
-    except Exception:
-        logger.print("[ERROR] Vina docking failed.")
+    except Exception as e:
+        logger.print(f"[ERROR] Vina docking failed for {';'.join(input_name_list)} in center={box_center}, size={box_size}. Reason: {e}")
         return None
 
     try:
         pose_string = v.poses()
-    except Exception:
-        logger.print("[ERROR] Failed to read Vina poses.")
+    except Exception as e:
+        logger.print(f"[ERROR] Failed to read Vina poses. Reason: {e}")
         return None
 
 
     try:
         energies = v.energies()
-    except Exception:
-        logger.print("[ERROR] Failed to read Vina energies.")
+    except Exception as e:
+        logger.print(f"[ERROR] Failed to read Vina energies. Reason: {e}")
         return None
 
     if pose_string is None or energies is None:
@@ -226,8 +226,8 @@ def dock_multiple_ligands_with_vina(
             except Exception:
                 energy_value_list.append(float(item))
 
-    except Exception:
-        logger.print("[ERROR] Failed to parse Vina energies.")
+    except Exception as e:
+        logger.print(f"[ERROR] Failed to parse Vina energies. Reason: {e}")
         return None
 
     if len(pose_string_list) != len(energy_value_list):
@@ -289,8 +289,8 @@ def dock_multiple_ligands_with_vina(
         result_list.sort(key=lambda x: float(x["energy"]))
         return result_list
 
-    except Exception:
-        logger.print("[ERROR] Failed to build docking result list.")
+    except Exception as e:
+        logger.print(f"[ERROR] Failed to build docking result list. Reason: {e}")
         return None
 
 def dock_multiple_substrates_from_structure(
@@ -302,7 +302,7 @@ def dock_multiple_substrates_from_structure(
     max_docking_attempt_num: int = 20,
     early_stop: bool = False,
     max_pose_read_num: int = 1,
-    exhaustiveness: int = 16,
+    exhaustiveness: int = 8,
     cpu: int = 0,
     min_rad: float = 1.8,
     max_rad: float = 6.2,
@@ -391,8 +391,8 @@ def dock_multiple_substrates_from_structure(
 
         try:
             box_size_list = [float(x) for x in manual_box_size_list]
-        except Exception:
-            logger.print("[ERROR] manual_box_size_list must contain numeric values.")
+        except Exception as e:
+            logger.print(f"[ERROR] manual_box_size_list must contain numeric values. Reason: {e}")
             return None
 
         if any(x <= 0.0 for x in box_size_list):
@@ -410,8 +410,8 @@ def dock_multiple_substrates_from_structure(
                 return None
             try:
                 box_center_list = [float(x) for x in catalytic_site_coord_list]
-            except Exception:
-                logger.print("[ERROR] catalytic_site_coord_list must contain numeric values.")
+            except Exception as e:
+                logger.print(f"[ERROR] catalytic_site_coord_list must contain numeric values. Reason: {e}")
                 return None
             logger.print("[INFO] Using catalytic site coordinate as docking box center.")
 
@@ -485,13 +485,12 @@ def dock_multiple_substrates_from_structure(
         with tempfile.TemporaryDirectory() as tmp_dir:
             tmp_dir_path = Path(tmp_dir)
 
-            protein_pdbqt_path = tmp_dir_path / "protein.pdbqt"
-
             dock_struct = remove_hydrogens_from_structure(struct=struct, logger=logger)
             if dock_struct is None:
                 logger.print("[ERROR] Failed to remove hydrogens from structure for docking.")
                 return None
 
+            protein_pdbqt_path = tmp_dir_path / "protein.pdbqt"
             ok = write_protein_pdbqt(struct=dock_struct,pdbqt_path=protein_pdbqt_path,logger=logger)
             if not ok:
                 logger.print("[ERROR] Failed to write protein PDBQT file.")
@@ -580,13 +579,13 @@ def dock_multiple_substrates_from_structure(
 
             if best_result is None:
                 logger.print(
-                    "[WARNING] No valid docking results were found for any substrate combination and docking box.")
-                return []
+                    "[ERROR] No valid docking results were found for any substrate combination and docking box.")
+                return None
 
             return [best_result]
 
-    except Exception:
-        logger.print("[ERROR] Failed to perform substrate docking workflow.")
+    except Exception as e:
+        logger.print(f"[ERROR] Failed to perform substrate docking workflow. Reason: {e}")
         return None
 
 def save_docking_results_and_generate_dock_report(
@@ -614,11 +613,8 @@ def save_docking_results_and_generate_dock_report(
 
     try:
         if len(docking_result_list) == 0:
-            logger.print("[WARNING] No docking results to save.")
-            return {
-                "report_type": "enzywizard_dock",
-                "enzyme_substrate_docking_result": {},
-            }
+            logger.print("[ERROR] No docking results to save.")
+            return None
 
         docking_result = docking_result_list[0]
 

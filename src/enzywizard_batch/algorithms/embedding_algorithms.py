@@ -7,10 +7,16 @@ from ..utils.logging_utils import Logger
 from ..utils.embedding_utils import load_esm2, postprocess_embedding_report_to_schema
 from ..utils.sequence_utils import  normalize_aa_name_to_one_letter
 
+ESM2_EMBEDDING_DIMS = {
+    "esm2_t6_8M_UR50D": 320,
+    "esm2_t12_35M_UR50D": 480,
+    "esm2_t30_150M_UR50D": 640,
+}
+
 def generate_embedding(sequence_dict: Dict[str, str],logger: Logger, model_name: str = "esm2_t6_8M_UR50D", device: Optional[str] = None) -> List[Dict[str, Any]] | None:
 
     # ---------- check input ----------
-    if model_name not in ("esm2_t6_8M_UR50D","esm2_t12_35M_UR50D","esm2_t30_150M_UR50D"):
+    if model_name not in ESM2_EMBEDDING_DIMS:
         logger.print("[ERROR] Model name parameter has to be in esm2_t6_8M_UR50D,esm2_t12_35M_UR50D, or esm2_t30_150M_UR50D.")
         return None
 
@@ -57,7 +63,8 @@ def generate_embedding(sequence_dict: Dict[str, str],logger: Logger, model_name:
     # ---------- layer ----------
     try:
         n_layers = int(model_name.split("_")[1].lstrip("t"))
-    except Exception:
+    except Exception as e:
+        logger.print(f"[ERROR] Failed to parse ESM2 layer count from model name {model_name}: {e}")
         n_layers = model.num_layers
 
     # ---------- inference ----------
@@ -72,6 +79,11 @@ def generate_embedding(sequence_dict: Dict[str, str],logger: Logger, model_name:
     # ---------- extract ----------
     L = len(sequence)
     per_res = reps[0, 1:1 + L, :].detach().cpu()  # [L, D]
+    embedding_dim = per_res.shape[1]
+    expected_dim = ESM2_EMBEDDING_DIMS[model_name]
+    if embedding_dim != expected_dim:
+        logger.print(f"[ERROR] Unexpected embedding dimension for {model_name}: expected {expected_dim}, got {embedding_dim}.")
+        return None
 
     # ---------- format output ----------
     result: List[Dict[str, Any]] = []
@@ -85,6 +97,7 @@ def generate_embedding(sequence_dict: Dict[str, str],logger: Logger, model_name:
         })
 
     return result
+
 
 def generate_embedding_report(embeddings: List[Dict[str, Any]]) -> dict | None:
     raw_report = {

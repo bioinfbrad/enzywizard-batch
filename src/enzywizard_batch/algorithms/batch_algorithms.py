@@ -45,15 +45,15 @@ from ..utils.IO_utils import load_protein_structure
 
 def run_batch_workflow(
     cleaned_input_path: str | Path,
-    input_msa: str | Path,
+    input_msa: str | Path | None,
     substrate_names: str | None,
     protein_name: str,
-    msa_name: str,
+    msa_name: str | None,
     output_dir: str | Path,
     logger: Logger,
     cutoff_area: float = 10.0,
     minimize_energy: bool = True,
-    minimization_iteration: int = 2000,
+    minimization_iteration: int = 100,
     energy_force_field_file: str = "charmm36.xml",
     flexibility_cutoff: float = 15.0,
     n_modes: int = 20,
@@ -70,8 +70,8 @@ def run_batch_workflow(
     num_confs: int = 5,
     prune_rms: float = 0.5,
     max_docking_attempt_num: int = 20,
-    early_stop: bool = False,
-    exhaustiveness: int = 16,
+    early_stop: bool = True,
+    exhaustiveness: int = 8,
     cpu: int = 0,
     dock_min_rad: float = 1.8,
     dock_max_rad: float = 6.2,
@@ -94,11 +94,12 @@ def run_batch_workflow(
     min_residue_index_gap: int = 3,
 ) -> Dict[str, Any] | None:
     cleaned_input_path = Path(cleaned_input_path)
-    input_msa = Path(input_msa)
+    has_msa = input_msa is not None and str(input_msa).strip() != ""
+    input_msa_path = Path(input_msa) if has_msa else None
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    path_dict = build_batch_output_paths(protein_name=protein_name, msa_name=msa_name, output_dir=output_dir)
+    path_dict = build_batch_output_paths(protein_name=protein_name, msa_name=msa_name or protein_name, output_dir=output_dir)
 
     report_dict: Dict[str, Dict[str, Any]] = {}
 
@@ -109,7 +110,8 @@ def run_batch_workflow(
 
     try:
         original_structure = load_protein_structure(cleaned_input_path, protein_name, logger)
-    except Exception:
+    except Exception as e:
+        logger.print(f"[ERROR] Exception while loading structure {cleaned_input_path}: {e}")
         original_structure = None
 
     if original_structure is None:
@@ -231,32 +233,35 @@ def run_batch_workflow(
         return None
     report_dict["enzywizard_disorder"] = disorder_report
 
-    logger.print("[INFO] Conservation calculation started")
-    msa_list = load_msa(input_msa, logger)
-    if msa_list is None:
-        return None
+    if has_msa:
+        logger.print("[INFO] Conservation calculation started")
+        msa_list = load_msa(input_msa_path, logger)
+        if msa_list is None:
+            return None
 
-    if not check_msa(input_msa, sequence_dict, msa_list, logger):
-        return None
+        if not check_msa(input_msa_path, sequence_dict, msa_list, logger):
+            return None
 
-    cleaned_msa_list = clean_msa_to_sto(msa_list, logger)
-    if cleaned_msa_list is None:
-        return None
+        cleaned_msa_list = clean_msa_to_sto(msa_list, logger)
+        if cleaned_msa_list is None:
+            return None
 
-    if not write_msa(cleaned_msa_list, path_dict["cleaned_sto"], logger):
-        return None
-    logger.print(f"[INFO] Cleaned MSA STO file saved: {path_dict['cleaned_sto']}")
+        if not write_msa(cleaned_msa_list, path_dict["cleaned_sto"], logger):
+            return None
+        logger.print(f"[INFO] Cleaned MSA STO file saved: {path_dict['cleaned_sto']}")
 
-    if not write_hmm(path_dict["cleaned_sto"], path_dict["hmm"], logger):
-        return None
-    logger.print(f"[INFO] HMM Profile file saved: {path_dict['hmm']}")
+        if not write_hmm(path_dict["cleaned_sto"], path_dict["hmm"], logger):
+            return None
+        logger.print(f"[INFO] HMM Profile file saved: {path_dict['hmm']}")
 
-    conservation_scores = compute_conservation_scores(path_dict["hmm"], sequence_dict, logger)
-    if conservation_scores is None:
-        return None
+        conservation_scores = compute_conservation_scores(path_dict["hmm"], sequence_dict, logger)
+        if conservation_scores is None:
+            return None
 
-    conservation_report = generate_conservation_report(conservation_scores)
-    report_dict["enzywizard_conservation"] = conservation_report
+        conservation_report = generate_conservation_report(conservation_scores)
+        report_dict["enzywizard_conservation"] = conservation_report
+    else:
+        logger.print("[INFO] No MSA input detected. Conservation calculation skipped.")
 
     logger.print("[INFO] Embedding calculation started")
     embeddings = generate_embedding(sequence_dict, logger, model_name=embedding_model_name)
@@ -462,7 +467,7 @@ def run_batch_workflow(
     report_dict["enzywizard_interaction"] = interaction_report
 
     logger.print("[INFO] Integrate workflow started")
-    integrate_strict = effective_has_substrate
+    integrate_strict = effective_has_substrate and has_msa
     integrate_report = integrate_reports(report_dict, integrate_strict, logger)
     if integrate_report is None:
         return None

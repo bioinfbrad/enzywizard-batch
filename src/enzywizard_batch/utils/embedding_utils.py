@@ -17,6 +17,7 @@ def load_esm2(model_name: str = "esm2_t6_8M_UR50D") -> Tuple[torch.nn.Module, es
     model.eval()
     return model, alphabet
 
+
 def postprocess_embedding_report_to_schema(
     raw_report: Dict[str, Any],
 ) -> Dict[str, Any]:

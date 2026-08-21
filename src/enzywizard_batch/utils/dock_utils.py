@@ -32,8 +32,8 @@ def get_sdf_atom_info_from_mol(mol: Chem.Mol, logger: Logger) -> List[Dict[str, 
 
         return atom_info_list
 
-    except Exception:
-        logger.print("[ERROR] Failed to extract atom information from Mol.")
+    except Exception as e:
+        logger.print(f"[ERROR] Failed to extract atom information from Mol. Reason: {e}")
         return None
 
 
@@ -133,8 +133,8 @@ def get_pdbqt_index_mapping(pdbqt_path: str | Path,logger: Logger) -> List[Dict[
 
         return mapping_info_list
 
-    except Exception:
-        logger.print("[ERROR] Failed to parse index mapping from PDBQT file.")
+    except Exception as e:
+        logger.print(f"[ERROR] Failed to parse index mapping from PDBQT file. Reason: {e}")
         return None
 
 
@@ -179,8 +179,8 @@ def get_pose_ligand_block_list(pose_string: str,logger: Logger) -> List[List[str
 
         return ligand_block_list
 
-    except Exception:
-        logger.print("[ERROR] Failed to split pose string into ligand blocks.")
+    except Exception as e:
+        logger.print(f"[ERROR] Failed to split pose string into ligand blocks. Reason: {e}")
         return None
 
 
@@ -324,8 +324,8 @@ def get_pose_for_substrate_atom_info(
             "atom_info_list": docked_atom_info_list,
         }
 
-    except Exception:
-        logger.print(f"[ERROR] Failed to parse pose for substrate: {substrate_name}")
+    except Exception as e:
+        logger.print(f"[ERROR] Failed to parse pose for substrate: {substrate_name}. Reason: {e}")
         return None
 
 def split_vina_pose_string(pose_string: str,logger: Logger) -> List[str] | None:
@@ -379,8 +379,8 @@ def split_vina_pose_string(pose_string: str,logger: Logger) -> List[str] | None:
 
         return pose_string_list
 
-    except Exception:
-        logger.print("[ERROR] Failed to split Vina pose string.")
+    except Exception as e:
+        logger.print(f"[ERROR] Failed to split Vina pose string. Reason: {e}")
         return None
 
 def get_substrate_sdf_path_group_dict(substrate_names: str,substrate_dir: str | Path,logger: Logger) -> Tuple[List[str], Dict[str, List[str]]] | None:
@@ -455,8 +455,8 @@ def get_substrate_sdf_path_group_dict(substrate_names: str,substrate_dir: str | 
 
         return substrate_name_list, substrate_to_sdf_path_list_dict
 
-    except Exception:
-        logger.print("[ERROR] Failed to group substrate SDF files.")
+    except Exception as e:
+        logger.print(f"[ERROR] Failed to group substrate SDF files. Reason: {e}")
         return None
 
 def compute_ligand_centroid(atom_info_list: List[Dict[str, Any]],logger: Logger) -> List[float] | None:
@@ -481,8 +481,8 @@ def compute_ligand_centroid(atom_info_list: List[Dict[str, Any]],logger: Logger)
             z_sum / n,
         ]
 
-    except Exception:
-        logger.print("[ERROR] Failed to compute ligand centroid.")
+    except Exception as e:
+        logger.print(f"[ERROR] Failed to compute ligand centroid. Reason: {e}")
         return None
 
 def remove_hydrogens_from_structure(struct: Structure, logger) -> Structure | None:
@@ -510,8 +510,8 @@ def remove_hydrogens_from_structure(struct: Structure, logger) -> Structure | No
 
         return new_struct
 
-    except Exception:
-        logger.print("[ERROR] Failed to remove hydrogens from structure")
+    except Exception as e:
+        logger.print(f"[ERROR] Failed to remove hydrogens from structure. Reason: {e}")
         return None
 
 def postprocess_dock_report_to_schema(raw_report: Dict[str, Any]) -> Dict[str, Any]:

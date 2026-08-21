@@ -286,7 +286,6 @@ def add_clusters(g: nx.DiGraph) -> List[Cluster]:
 
     return clusters
 
-
 def postprocess_hydrocluster_report_to_schema(
     raw_report: Dict[str, Any],
 ) -> Dict[str, Any]:

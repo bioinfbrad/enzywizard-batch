@@ -11,7 +11,6 @@ from openmm.app import Topology
 from openmm.vec3 import Vec3
 from openmm import unit
 
-
 def standardize_resname(resname: str) -> str:
     resname = resname.strip().upper()
     if resname in AA3_STANDARD:
@@ -33,16 +32,6 @@ def is_hydrogen_atom(atom: Atom) -> bool:
         return True
     return False
 
-def get_residue_heavy_atom_name_set(res: Residue) -> set[str]:
-    heavy_atom_name_set: set[str] = set()
-
-    for atom in res.get_atoms():
-        if is_hydrogen_atom(atom):
-            continue
-        heavy_atom_name_set.add(normalize_atom_name(atom.get_name()))
-
-    return heavy_atom_name_set
-
 def choose_atom_altloc(atom_list: List[Atom]) -> Atom:
     # Prefer blank altloc
     for a in atom_list:
@@ -60,6 +49,16 @@ def choose_atom_altloc(atom_list: List[Atom]) -> Atom:
             best, best_occ = a, occ
     return best
 
+def get_residue_heavy_atom_name_set(res: Residue) -> set[str]:
+    heavy_atom_name_set: set[str] = set()
+
+    for atom in res.get_atoms():
+        if is_hydrogen_atom(atom):
+            continue
+        heavy_atom_name_set.add(normalize_atom_name(atom.get_name()))
+
+    return heavy_atom_name_set
+
 def clone_atom(atom: Atom, *, new_coord=None) -> Atom:
     coord = new_coord if new_coord is not None else atom.get_coord()
     normalized_name = normalize_atom_name(atom.get_name())
@@ -74,6 +73,7 @@ def clone_atom(atom: Atom, *, new_coord=None) -> Atom:
         serial_number=atom.get_serial_number(),
         element=atom.element.strip().upper() if atom.element is not None else atom.element,
     )
+
 
 def get_single_chain_from_pdbfixer(fixer: PDBFixer,logger: Logger):
     topology = fixer.topology
@@ -112,7 +112,7 @@ def count_hydrogen_atoms_in_fixer(fixer: PDBFixer) -> int:
 def get_aa1_from_resname(resname: str) -> str:
     return normalize_aa_name_to_one_letter(resname)
 
-def get_single_chain_protein_residue_info_from_pdbfixer_chain(chain) -> List[Dict[str, Any]]:
+def get_single_chain_protein_residue_info_from_pdbfixer_chain(chain, logger: Logger | None = None) -> List[Dict[str, Any]]:
     residue_info_list: List[Dict[str, Any]] = []
 
     for res in chain.residues():
@@ -122,7 +122,12 @@ def get_single_chain_protein_residue_info_from_pdbfixer_chain(chain) -> List[Dic
 
         try:
             aa_index = int(str(res.id).strip())
-        except Exception:
+        except Exception as e:
+            if logger is not None:
+                logger.print(
+                    f"[ERROR] Failed to parse residue id '{res.id}' for residue '{res.name}': "
+                    f"{e}"
+                )
             aa_index = -1
 
         residue_info_list.append(

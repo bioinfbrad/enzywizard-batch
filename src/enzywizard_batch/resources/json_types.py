@@ -119,7 +119,7 @@ class AminoAcidResidueProperty(TypedDict):
     residue_name_one_hot_encoding: list[int]
 
     residue_chemical_classification: str
-    residue_chemical_classification_one_hot_encoding: list[int]
+    residue_chemical_classification_multi_hot_encoding: list[int]
 
     residue_secondary_structure: str
     residue_secondary_structure_one_hot_encoding: list[int]
@@ -436,15 +436,10 @@ class MolecularInteractionTypeCount(TypedDict):
     disulfide_bond_count: int
 
 
-class MolecularInteractionStatisticsBlock(TypedDict):
-    interaction_count: MolecularInteractionTypeCount
-    unique_pair_interaction_count: MolecularInteractionTypeCount
-
-
 class MolecularInteractionStatistics(TypedDict):
-    overall_molecular_interaction_statistics: MolecularInteractionStatisticsBlock
-    intra_enzyme_interaction_statistics: MolecularInteractionStatisticsBlock
-    enzyme_substrate_interaction_statistics: MolecularInteractionStatisticsBlock
+    overall_molecular_interaction_statistics: MolecularInteractionTypeCount
+    intra_enzyme_interaction_statistics: MolecularInteractionTypeCount
+    enzyme_substrate_interaction_statistics: MolecularInteractionTypeCount
 
 
 class EnzyWizardInteractionOutput(TypedDict):
@@ -459,53 +454,88 @@ integrate_report
 
 
 class IntegratedOverallStatistics(TypedDict, total=False):
-    sequence_length: int
-    total_molecular_weight: float
-    total_net_charge: float
-    total_residue_volume: float
-    max_3d_diameter: float
-    radius_of_gyration: float
+    sequence_length: Required[int]
+    total_molecular_weight: Required[float]
+    total_net_charge: Required[float]
+    total_residue_volume: Required[float]
+    max_3d_diameter: Required[float]
+    radius_of_gyration: Required[float]
     asphericity: float
     spherocity: float
     principal_moment_ratio: float
-    bounding_box_volume: float
-    mean_pairwise_ca_distance: float
-    std_pairwise_ca_distance: float
+    bounding_box_volume: Required[float]
+    mean_pairwise_ca_distance: Required[float]
+    std_pairwise_ca_distance: Required[float]
 
-    residue_name_count: list[int]
-    residue_chemical_classification_count: list[int]
-    residue_secondary_structure_count: list[int]
+    residue_name_alanine_count: Required[int]
+    residue_name_cysteine_count: Required[int]
+    residue_name_aspartic_acid_count: Required[int]
+    residue_name_glutamic_acid_count: Required[int]
+    residue_name_phenylalanine_count: Required[int]
+    residue_name_glycine_count: Required[int]
+    residue_name_histidine_count: Required[int]
+    residue_name_isoleucine_count: Required[int]
+    residue_name_lysine_count: Required[int]
+    residue_name_leucine_count: Required[int]
+    residue_name_methionine_count: Required[int]
+    residue_name_asparagine_count: Required[int]
+    residue_name_proline_count: Required[int]
+    residue_name_glutamine_count: Required[int]
+    residue_name_arginine_count: Required[int]
+    residue_name_serine_count: Required[int]
+    residue_name_threonine_count: Required[int]
+    residue_name_valine_count: Required[int]
+    residue_name_tryptophan_count: Required[int]
+    residue_name_tyrosine_count: Required[int]
 
-    hydrophobic_cluster_count: int
-    max_hydrophobic_cluster_area: float
-    total_hydrophobic_cluster_area: float
+    residue_chemical_classification_uncharged_polar_count: Required[int]
+    residue_chemical_classification_positively_charged_count: Required[int]
+    residue_chemical_classification_negatively_charged_count: Required[int]
+    residue_chemical_classification_hydrophobic_count: Required[int]
+    residue_chemical_classification_aromatic_count: Required[int]
+    residue_chemical_classification_aliphatic_count: Required[int]
+    residue_chemical_classification_heterocyclic_count: Required[int]
+    residue_chemical_classification_sulfur_containing_count: Required[int]
 
-    disordered_region_count: int
-    max_disordered_region_length: int
-    total_disordered_region_length: int
+    secondary_structure_unassigned_count: Required[int]
+    secondary_structure_alpha_helix_count: Required[int]
+    secondary_structure_beta_bridge_count: Required[int]
+    secondary_structure_extended_strand_count: Required[int]
+    secondary_structure_three_ten_helix_count: Required[int]
+    secondary_structure_pi_helix_count: Required[int]
+    secondary_structure_turn_count: Required[int]
+    secondary_structure_bend_count: Required[int]
 
-    binding_pocket_count: int
-    max_binding_pocket_volume: float
-    total_binding_pocket_volume: float
+    hydrophobic_cluster_count: Required[int]
+    max_hydrophobic_cluster_area: Required[float]
+    total_hydrophobic_cluster_area: Required[float]
 
-    total_potential_energy: float
-    harmonic_bond_potential_energy: float
-    harmonic_angle_potential_energy: float
-    custom_bond_potential_energy: float
-    custom_torsion_potential_energy: float
-    custom_nonbonded_potential_energy: float
-    nonbonded_potential_energy: float
-    periodic_torsion_potential_energy: float
-    cmap_torsion_potential_energy: float
+    disordered_region_count: Required[int]
+    max_disordered_region_length: Required[int]
+    total_disordered_region_length: Required[int]
+
+    binding_pocket_count: Required[int]
+    max_binding_pocket_volume: Required[float]
+    total_binding_pocket_volume: Required[float]
+
+    total_potential_energy: Required[float]
+    harmonic_bond_potential_energy: Required[float]
+    harmonic_angle_potential_energy: Required[float]
+    custom_bond_potential_energy: Required[float]
+    custom_torsion_potential_energy: Required[float]
+    custom_nonbonded_potential_energy: Required[float]
+    nonbonded_potential_energy: Required[float]
+    periodic_torsion_potential_energy: Required[float]
+    cmap_torsion_potential_energy: Required[float]
 
     enzyme_substrate_binding_affinity: float
 
-    hydrogen_bond_count: int
-    ionic_bond_count: int
-    van_der_waals_contact_count: int
-    pi_pi_stacking_count: int
-    pi_cation_interaction_count: int
-    disulfide_bond_count: int
+    hydrogen_bond_count: Required[int]
+    ionic_bond_count: Required[int]
+    van_der_waals_contact_count: Required[int]
+    pi_pi_stacking_count: Required[int]
+    pi_cation_interaction_count: Required[int]
+    disulfide_bond_count: Required[int]
 
 
 class IntegratedResidueNode(TypedDict):
@@ -516,34 +546,34 @@ class IntegratedResidueNode(TypedDict):
     residue_index: Required[int]
     residue_name: Required[str]
 
-    residue_name_one_hot_encoding: NotRequired[list[Literal[0, 1]]]
-    residue_alpha_carbon_coordinate: NotRequired[list[float]]
+    residue_name_one_hot_encoding: Required[list[Literal[0, 1]]]
+    residue_alpha_carbon_coordinate: Required[list[float]]
 
-    residue_chemical_classification: NotRequired[str]
-    residue_chemical_classification_one_hot_encoding: NotRequired[list[Literal[0, 1]]]
+    residue_chemical_classification: Required[str]
+    residue_chemical_classification_multi_hot_encoding: Required[list[Literal[0, 1]]]
 
-    residue_secondary_structure: NotRequired[str]
-    residue_secondary_structure_one_hot_encoding: NotRequired[list[Literal[0, 1]]]
+    residue_secondary_structure: Required[str]
+    residue_secondary_structure_one_hot_encoding: Required[list[Literal[0, 1]]]
 
-    residue_relative_solvent_accessibility: NotRequired[float]
-    residue_backbone_phi_angle: NotRequired[float]
-    residue_backbone_psi_angle: NotRequired[float]
+    residue_relative_solvent_accessibility: Required[float]
+    residue_backbone_phi_angle: Required[float]
+    residue_backbone_psi_angle: Required[float]
 
-    residue_net_charge: NotRequired[float]
-    residue_pka: NotRequired[float]
-    residue_volume: NotRequired[float]
-    residue_hydrophobicity: NotRequired[float]
-    residue_molecular_weight: NotRequired[float]
-    residue_isoelectric_point: NotRequired[float]
+    residue_net_charge: Required[float]
+    residue_pka: Required[float]
+    residue_volume: Required[float]
+    residue_hydrophobicity: Required[float]
+    residue_molecular_weight: Required[float]
+    residue_isoelectric_point: Required[float]
 
-    residue_root_mean_square_fluctuation: NotRequired[float]
+    residue_root_mean_square_fluctuation: Required[float]
     residue_sequence_conservation_score: NotRequired[float]
 
-    residue_embedding: NotRequired[list[float]]
+    residue_embedding: Required[list[float]]
 
-    is_in_hydrophobic_cluster: NotRequired[bool]
-    is_in_disordered_region: NotRequired[bool]
-    is_in_binding_pocket: NotRequired[bool]
+    is_in_hydrophobic_cluster: Required[bool]
+    is_in_disordered_region: Required[bool]
+    is_in_binding_pocket: Required[bool]
 
 
 class IntegratedSubstrateNode(TypedDict):
@@ -554,26 +584,26 @@ class IntegratedSubstrateNode(TypedDict):
     substrate_index: Required[int]
     substrate_name: Required[str]
 
-    substrate_smiles: NotRequired[str]
-    substrate_atom_count: NotRequired[int]
-    substrate_molecular_weight: NotRequired[float]
-    substrate_logp: NotRequired[float]
-    substrate_tpsa: NotRequired[float]
-    substrate_heavy_atom_count: NotRequired[int]
-    substrate_hbond_donor_count: NotRequired[int]
-    substrate_hbond_acceptor_count: NotRequired[int]
-    substrate_rotatable_bond_count: NotRequired[int]
-    substrate_molar_refractivity: NotRequired[float]
-    substrate_structure_energy: NotRequired[float]
-    substrate_structure_max_3d_diameter: NotRequired[float]
-    substrate_structure_mean_pairwise_atom_distance: NotRequired[float]
-    substrate_structure_std_pairwise_atom_distance: NotRequired[float]
-    substrate_structure_asphericity: NotRequired[float]
-    substrate_structure_spherocity: NotRequired[float]
-    substrate_structure_principal_moment_ratio: NotRequired[float]
-    substrate_structure_radius_of_gyration: NotRequired[float]
-    docked_substrate_center_coordinate: NotRequired[list[float]]
-    substrate_fingerprint_encoding: NotRequired[list[Literal[0, 1]]]
+    substrate_smiles: Required[str]
+    substrate_atom_count: Required[int]
+    substrate_molecular_weight: Required[float]
+    substrate_logp: Required[float]
+    substrate_tpsa: Required[float]
+    substrate_heavy_atom_count: Required[int]
+    substrate_hbond_donor_count: Required[int]
+    substrate_hbond_acceptor_count: Required[int]
+    substrate_rotatable_bond_count: Required[int]
+    substrate_molar_refractivity: Required[float]
+    substrate_structure_energy: Required[float]
+    substrate_structure_max_3d_diameter: Required[float]
+    substrate_structure_mean_pairwise_atom_distance: Required[float]
+    substrate_structure_std_pairwise_atom_distance: Required[float]
+    substrate_structure_asphericity: Required[float]
+    substrate_structure_spherocity: Required[float]
+    substrate_structure_principal_moment_ratio: Required[float]
+    substrate_structure_radius_of_gyration: Required[float]
+    docked_substrate_center_coordinate: Required[list[float]]
+    substrate_fingerprint_encoding: Required[list[Literal[0, 1]]]
 
 
 IntegratedNode: TypeAlias = IntegratedResidueNode | IntegratedSubstrateNode
@@ -595,9 +625,22 @@ class IntegratedIsolatedNodeGraphEntry(TypedDict):
     isolated_node: IntegratedNode
 
 
+class IntegratedGraphEdgeNodeReference(TypedDict):
+    node_index: int
+
+
+class IntegratedGraphEdgeEntry(TypedDict):
+    molecular_interaction: IntegratedMolecularInteraction
+    source_node: IntegratedGraphEdgeNodeReference
+    target_node: IntegratedGraphEdgeNodeReference
+
+
 IntegratedGraphEntry: TypeAlias = (
     IntegratedInteractionGraphEntry | IntegratedIsolatedNodeGraphEntry
 )
+
+IntegratedGraphNodeCollection: TypeAlias = list[IntegratedNode]
+IntegratedGraphEdgeCollection: TypeAlias = list[IntegratedGraphEdgeEntry]
 
 
 class EnzyWizardIntegrateOutput(TypedDict):

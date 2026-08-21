@@ -1,11 +1,12 @@
 from __future__ import annotations
 from argparse import Namespace, ArgumentParser
+import sys
 from ..services.batch_service import run_batch_service
 
 
 def add_batch_parser(parser: ArgumentParser) -> None:
     parser.add_argument("-i", "--cleaned_input_path",required=True,help="Path to input cleaned CIF/PDB file. The file needs to already be cleaned.")
-    parser.add_argument("-m", "--input_msa",required=True,help="Path to input MSA file (STO/aligned FASTA/A3M format). The MSA file needs to be generated using the cleaned FASTA sequence.")
+    parser.add_argument("-m", "--input_msa",required=False,default=None,help="Optional path to input MSA file (STO/aligned FASTA/A3M format). If omitted, conservation analysis and HMM output are skipped.")
     parser.add_argument("-s","--substrate_names",required=False,default=None,help="Optional substrate names or SMILES strings. Multiple substrates should be separated by ';'. If not provided, substrate, dock, and protein-substrate interaction steps will be skipped.")
     parser.add_argument("-o", "--output_dir",required=True,help="Path to output directory. If --save_extra_outputs is False, only final integrate JSON files and log.txt will be kept here.")
     parser.add_argument("--save_extra_outputs", dest="save_extra_outputs", action="store_true",help="Enable keeping extra output files such as HMM, substrate SDFs, docked SDFs, and complex CIF files (default: Disabled).")
@@ -13,7 +14,7 @@ def add_batch_parser(parser: ArgumentParser) -> None:
     parser.add_argument("--hydrocluster_cutoff",type=float,default=10.0,help="Minimum contact area cutoff for hydrophobic cluster residue-residue connection (default: 10.0).")
     parser.add_argument("--no_minimize_energy",action="store_false",dest="minimize_energy",help="Disable performing an energy minimization before energy evaluation (default: enabled).")
     parser.set_defaults(minimize_energy=True)
-    parser.add_argument("--energy_minimization_iteration",type=int,default=1000,help="Maximum number of iterations for energy minimization (default: 1000).")
+    parser.add_argument("--energy_minimization_iteration",type=int,default=100,help="Maximum number of iterations for energy minimization (default: 100).")
     parser.add_argument("--flexibility_method",type=str,choices=["ANM", "GNM"],default="ANM",help="Method for RMSF calculation: ANM or GNM (default: ANM).")
     parser.add_argument("--flexibility_cutoff",type=float,default=15.0,help="Distance cutoff used to determine the residue connection in ProDy (default: 15.0).")
     parser.add_argument("--flexibility_n_modes",type=int,default=20,help="Number of low-frequency normal modes used for RMSF calculation (default: 20).")
@@ -31,11 +32,11 @@ def add_batch_parser(parser: ArgumentParser) -> None:
     parser.add_argument("--dock_max_attempt_num",type=int,default=20,help="Maximum number of docking attempts (default: 20).")
     parser.add_argument("--dock_no_early_stop", action="store_false", dest="dock_early_stop",help="Disable stopping immediately after the first successful docking result (default: enabled).")
     parser.set_defaults(dock_early_stop=True)
-    parser.add_argument("--dock_exhaustiveness",type=int,default=16,help="Exhaustiveness of AutoDock Vina search (default: 16).")
+    parser.add_argument("--dock_exhaustiveness",type=int,default=8,help="Exhaustiveness of AutoDock Vina search (default: 8).")
     parser.add_argument("--dock_cpu",type=int,default=0,help="Number of CPUs used by AutoDock Vina (default: 0).")
-    parser.add_argument("--dock_catalytic_residue",type=int,default=None,help="Cleaned protein residue index used as the docking box center. Requires '--box_size'. When this parameter is provided, PyVOL pocket detection is not used.")
-    parser.add_argument("--dock_catalytic_site_coord",default=None,help="Catalytic site center coordinate separated by ',' as 'x,y,z'. Requires '--box_size'. When this parameter is provided, PyVOL pocket detection is not used.")
-    parser.add_argument("--dock_box_size",default=None,help="Docking box size separated by ',' as 'x,y,z'. Required when '--catalytic_residue' or '--catalytic_site_coord' is provided.")
+    parser.add_argument("--dock_catalytic_residue",type=int,default=None,help="Cleaned protein residue index used as the docking box center. Requires '--dock_box_size'. When this parameter is provided, PyVOL pocket detection is not used.")
+    parser.add_argument("--dock_catalytic_site_coord",default=None,help="Catalytic site center coordinate separated by ',' as 'x,y,z'. Requires '--dock_box_size'. When this parameter is provided, PyVOL pocket detection is not used.")
+    parser.add_argument("--dock_box_size",default=None,help="Docking box size separated by ',' as 'x,y,z'. Required when '--dock_catalytic_residue' or '--dock_catalytic_site_coord' is provided.")
     parser.add_argument("--hbond_bonded_h_min_distance",type=float,default=0.8,help="Minimum bonded heavy atom-hydrogen distance used for hydrogen bond donor detection (default: 0.8).")
     parser.add_argument("--hbond_bonded_h_max_distance",type=float,default=1.3,help="Maximum bonded heavy atom-hydrogen distance used for hydrogen bond donor detection (default: 1.3).")
     parser.add_argument("--hbond_da_max_distance",type=float,default=3.9,help="Maximum donor-acceptor distance cutoff for hydrogen bond detection (default: 3.9).")
@@ -53,7 +54,7 @@ def add_batch_parser(parser: ArgumentParser) -> None:
 
 
 def run_batch(args: Namespace) -> None:
-    run_batch_service(
+    success = run_batch_service(
         cleaned_input_path=args.cleaned_input_path,
         input_msa=args.input_msa,
         substrate_names=args.substrate_names,
@@ -98,3 +99,5 @@ def run_batch(args: Namespace) -> None:
         ring_cation_angle_cutoff_deg=args.pication_angle_cutoff,
         ss_max_distance_A=args.ssbond_max_distance,
     )
+    if not success:
+        sys.exit(1)

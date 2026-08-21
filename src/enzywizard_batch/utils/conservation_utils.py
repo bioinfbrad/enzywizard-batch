@@ -870,6 +870,7 @@ def clean_a3m(msa_list: List[Dict[str, str]], logger: Logger) -> List[Dict[str, 
         logger.print(f"[ERROR] Exception in clean_a3m: {e}")
         return None
 
+
 def postprocess_conservation_report_to_schema(
     raw_report: Dict[str, Any],
 ) -> Dict[str, Any] | None:

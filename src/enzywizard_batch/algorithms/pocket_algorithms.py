@@ -13,6 +13,7 @@ from Bio.PDB.Structure import Structure
 from ..utils.structure_utils import get_single_chain,get_residues_by_chain
 from ..utils.IO_utils import write_pdb
 from ..utils.sequence_utils import normalize_aa_name_to_one_letter
+from ..utils.logging_utils import Logger
 
 
 
@@ -52,8 +53,8 @@ def compute_pockets(struct: Structure, logger, min_rad: float = 1.8, max_rad: fl
         # ---------------------------
         try:
             write_pdb(struct, pdb_path)
-        except Exception:
-            logger.print(f"[ERROR] Failed to write temporary PDB file for PyVOL.")
+        except Exception as e:
+            logger.print(f"[ERROR] Failed to write temporary PDB file for PyVOL: {e}")
             return None
 
         if not pdb_path.exists():
@@ -84,8 +85,8 @@ logger_file_level = DEBUG
 """
         try:
             cfg_path.write_text(cfg_text, encoding="utf-8")
-        except Exception:
-            logger.print(f"[ERROR] Failed to write PyVOL config file.")
+        except Exception as e:
+            logger.print(f"[ERROR] Failed to write PyVOL config file: {e}")
             return None
 
         if not cfg_path.exists():
@@ -107,18 +108,23 @@ logger_file_level = DEBUG
                 env=env,
                 check=False,
             )
-        except Exception:
-            logger.print(f"[ERROR] Failed to run PyVOL.")
+        except Exception as e:
+            logger.print(f"[ERROR] Failed to run PyVOL: {e}")
             return None
 
         try:
             log_path.write_text(p.stdout or "", encoding="utf-8")
-        except Exception:
-            logger.print(f"[ERROR] Failed to write PyVOL log file.")
+        except Exception as e:
+            logger.print(f"[ERROR] Failed to write PyVOL log file: {e}")
             return None
 
         if p.returncode != 0:
-            logger.print(f"[ERROR] PyVOL failed with return code {p.returncode}. This may be due to excessively small/large probe radius.")
+            pyvol_output = (p.stdout or "").strip()
+            if pyvol_output:
+                pyvol_output = "\n".join(pyvol_output.splitlines()[-20:])
+                logger.print(f"[ERROR] PyVOL failed with return code {p.returncode}. Output tail: {pyvol_output}")
+            else:
+                logger.print(f"[ERROR] PyVOL failed with return code {p.returncode}. This may be due to excessively small/large probe radius.")
             return None
 
         # ---------------------------
@@ -175,8 +181,8 @@ logger_file_level = DEBUG
         for rp in rept_files:
             try:
                 lines = rp.read_text(encoding="utf-8", errors="ignore").splitlines()
-            except Exception:
-                logger.print(f"[ERROR] Failed to read report file: {rp}")
+            except Exception as e:
+                logger.print(f"[ERROR] Failed to read report file {rp}: {e}")
                 return None
 
             if not lines:
@@ -218,8 +224,8 @@ logger_file_level = DEBUG
                             continue
                         centers.append([x, y, z])
                         radii.append(r)
-            except Exception:
-                logger.print(f"[ERROR] Failed to read xyzrg file: {xyzrg}")
+            except Exception as e:
+                logger.print(f"[ERROR] Failed to read xyzrg file {xyzrg}: {e}")
                 return None
 
             if not centers:
@@ -329,8 +335,10 @@ def calculate_pocket_statistics(pocket_regions: List[Dict[str, Any]]) -> Dict[st
     }
 
 
+
 def postprocess_pocket_report_to_schema(
     raw_report: Dict[str, Any],
+    logger: Logger | None = None,
 ) -> Dict[str, Any] | None:
     """
     Postprocess the raw EnzyWizard-Pocket report into the official JSON Schema field names.
@@ -394,11 +402,14 @@ def postprocess_pocket_report_to_schema(
 
         return schema_report
 
-    except Exception:
+    except Exception as e:
+        if logger is not None:
+            logger.print(f"[ERROR] Failed to postprocess pocket report: {e}")
         return None
 
 def generate_pocket_report(
     pocket_regions: List[Dict[str, Any]],
+    logger: Logger | None = None,
 ) -> Dict[str, Any] | None:
     pocket_region_statistics = calculate_pocket_statistics(pocket_regions)
 
@@ -408,4 +419,4 @@ def generate_pocket_report(
         "pocket_regions": pocket_regions,
     }
 
-    return postprocess_pocket_report_to_schema(raw_report)
+    return postprocess_pocket_report_to_schema(raw_report, logger)

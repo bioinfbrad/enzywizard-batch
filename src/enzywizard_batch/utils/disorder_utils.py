@@ -1,6 +1,6 @@
 from __future__ import annotations
-from typing import Any, Dict, List
 from ..utils.logging_utils import Logger
+from typing import Any, Dict, List
 
 def moving_average(values: List[float], window_size: int, logger: Logger) -> List[float] | None:
     if window_size <= 0:
@@ -22,6 +22,8 @@ def moving_average(values: List[float], window_size: int, logger: Logger) -> Lis
         result.append(sum(sub) / len(sub))
 
     return result
+
+
 
 def postprocess_disorder_report_to_schema(
     raw_report: Dict[str, Any],

@@ -69,13 +69,13 @@ def get_emission_probabilities_from_hmm(hmm_file: str | Path, logger: Logger) ->
                 aa = str(aa).upper()
 
                 if raw == "*":
-                    raw_score_dict[aa] = None
+                    raw_score_dict[aa] = 0.0
                     raw_prob_list.append(0.0)
                 else:
                     try:
                         raw_value = float(raw)
-                    except Exception:
-                        logger.print(f"[ERROR] Invalid HMM emission value '{raw}' at position {pos} in {str(p)}")
+                    except Exception as e:
+                        logger.print(f"[ERROR] Invalid HMM emission value '{raw}' at position {pos} in {str(p)}: {e}")
                         return None
 
                     raw_score_dict[aa] = raw_value

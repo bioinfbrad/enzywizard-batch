@@ -372,8 +372,8 @@ def write_sdf(mol_3d: Chem.Mol, sdf_path: str | Path, logger: Logger,) -> bool:
             return False
 
         return True
-    except Exception:
-        logger.print("[ERROR] Failed to save Mol(3D) to SDF file.")
+    except Exception as e:
+        logger.print(f"[ERROR] Failed to save Mol(3D) to SDF file: {sdf_path}. Reason: {e}")
         return False
 
 
@@ -410,8 +410,8 @@ def save_substrate_structures(substrate_feature_list: List[Dict[str, Any]],outpu
 
         return True
 
-    except Exception:
-        logger.print("[ERROR] Failed to save substrate structures.")
+    except Exception as e:
+        logger.print(f"[ERROR] Failed to save substrate structures. Reason: {e}")
         return False
 
 def write_protein_pdbqt(struct: Structure,pdbqt_path: str | Path,logger: Logger) -> bool:
@@ -582,7 +582,11 @@ def write_protein_pdbqt(struct: Structure,pdbqt_path: str | Path,logger: Logger)
 
                         return True
 
-                logger.print("[ERROR] mk_prepare_receptor.py failed.")
+                receptor_output = "\n".join(((p.stderr or p.stdout or "").strip()).splitlines()[-20:])
+                if receptor_output:
+                    logger.print(f"[ERROR] mk_prepare_receptor.py failed with return code {p.returncode}. Output tail: {receptor_output}")
+                else:
+                    logger.print(f"[ERROR] mk_prepare_receptor.py failed with return code {p.returncode}.")
                 return False
 
         if not pdbqt_path.exists() or pdbqt_path.stat().st_size <= 0:
@@ -591,8 +595,8 @@ def write_protein_pdbqt(struct: Structure,pdbqt_path: str | Path,logger: Logger)
 
         return True
 
-    except Exception:
-        logger.print("[ERROR] Failed to convert Structure to PDBQT.")
+    except Exception as e:
+        logger.print(f"[ERROR] Failed to convert Structure to PDBQT: {pdbqt_path}. Reason: {e}")
         return False
 
 def write_substrate_pdbqt_from_sdf(sdf_path: str | Path,pdbqt_path: str | Path,logger: Logger) -> bool:
@@ -620,7 +624,11 @@ def write_substrate_pdbqt_from_sdf(sdf_path: str | Path,pdbqt_path: str | Path,l
         )
 
         if p.returncode != 0:
-            logger.print("[ERROR] mk_prepare_ligand.py failed.")
+            ligand_output = "\n".join(((p.stderr or p.stdout or "").strip()).splitlines()[-20:])
+            if ligand_output:
+                logger.print(f"[ERROR] mk_prepare_ligand.py failed with return code {p.returncode}. Output tail: {ligand_output}")
+            else:
+                logger.print(f"[ERROR] mk_prepare_ligand.py failed with return code {p.returncode}.")
             return False
 
         if not pdbqt_path.exists() or pdbqt_path.stat().st_size <= 0:
@@ -629,8 +637,8 @@ def write_substrate_pdbqt_from_sdf(sdf_path: str | Path,pdbqt_path: str | Path,l
 
         return True
 
-    except Exception:
-        logger.print("[ERROR] Failed to convert SDF to PDBQT.")
+    except Exception as e:
+        logger.print(f"[ERROR] Failed to convert SDF to PDBQT: {sdf_path}. Reason: {e}")
         return False
 
 def load_sdf_mol_3d(sdf_path: str | Path, logger: Logger) -> Chem.Mol | None:
@@ -657,8 +665,8 @@ def load_sdf_mol_3d(sdf_path: str | Path, logger: Logger) -> Chem.Mol | None:
 
         return mol
 
-    except Exception:
-        logger.print("[ERROR] Failed to read Mol(3D) from SDF file.")
+    except Exception as e:
+        logger.print(f"[ERROR] Failed to read Mol(3D) from SDF file: {sdf_path}. Reason: {e}")
         return None
 
 def write_docked_sdf_from_atom_info(original_mol_3d: Chem.Mol,docked_atom_info_list: List[Dict[str, Any]],sdf_path: str | Path,logger: Logger) -> Chem.Mol | None:
@@ -693,8 +701,8 @@ def write_docked_sdf_from_atom_info(original_mol_3d: Chem.Mol,docked_atom_info_l
 
         return mol
 
-    except Exception:
-        logger.print("[ERROR] Failed to write docked atom information to SDF file")
+    except Exception as e:
+        logger.print(f"[ERROR] Failed to write docked atom information to SDF file: {sdf_path}. Reason: {e}")
         return None
 
 def write_docked_complex_from_mol_list(
@@ -825,8 +833,8 @@ def write_docked_complex_from_mol_list(
 
         return str(cif_path)
 
-    except Exception:
-        logger.print(f"[ERROR] Failed to build docked complex CIF/PDB from Mol list")
+    except Exception as e:
+        logger.print(f"[ERROR] Failed to build docked complex CIF/PDB from Mol list. Reason: {e}")
         return None
 
 def load_openmm_modeller(path: str | Path, logger) -> Modeller | None:
@@ -836,8 +844,8 @@ def load_openmm_modeller(path: str | Path, logger) -> Modeller | None:
 
     try:
         p = Path(path)
-    except Exception:
-        logger.print("[ERROR] Failed to parse path.")
+    except Exception as e:
+        logger.print(f"[ERROR] Failed to parse path: {e}")
         return None
 
     if not p.exists() or p.stat().st_size <= 0:
@@ -857,8 +865,8 @@ def load_openmm_modeller(path: str | Path, logger) -> Modeller | None:
 
         return Modeller(obj.topology, obj.positions)
 
-    except Exception:
-        logger.print(f"[ERROR] Failed to load OpenMM Modeller from {str(p)}")
+    except Exception as e:
+        logger.print(f"[ERROR] Failed to load OpenMM Modeller from {str(p)}: {e}")
         return None
 
 def load_substrate_name_and_mol_3d_list(substrate_names: str,substrate_dir: str | Path,logger: Logger) -> Tuple[List[str], List[Chem.Mol]] | None:
@@ -872,8 +880,8 @@ def load_substrate_name_and_mol_3d_list(substrate_names: str,substrate_dir: str 
 
     try:
         substrate_dir = Path(substrate_dir)
-    except Exception:
-        logger.print("[ERROR] Failed to parse substrate_dir.")
+    except Exception as e:
+        logger.print(f"[ERROR] Failed to parse substrate_dir: {e}")
         return None
 
     if not substrate_dir.exists() or not substrate_dir.is_dir():

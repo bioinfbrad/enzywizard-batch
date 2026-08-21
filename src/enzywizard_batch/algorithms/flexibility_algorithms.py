@@ -32,6 +32,9 @@ def compute_protein_rmsf(struct: Structure, logger: Logger, cutoff: float = 15.0
     except Exception as e:
         logger.print(f"[ERROR] Failed to collect CA coordinates: {e}")
         return None
+    if not np.all(np.isfinite(ca_coords)):
+        logger.print("[ERROR] Non-finite CA coordinates detected.")
+        return None
 
     method = str(method).upper().strip()
 
@@ -71,6 +74,9 @@ def compute_protein_rmsf(struct: Structure, logger: Logger, cutoff: float = 15.0
     if len(rmsf) != len(residue_list):
         logger.print("[ERROR] RMSF result length does not match residue count.")
         return None
+    if not np.all(np.isfinite(rmsf)):
+        logger.print("[ERROR] Non-finite RMSF values detected.")
+        return None
 
     try:
         for (res_id, resname, coord), rmsf_value in zip(residue_list, rmsf):
@@ -87,6 +93,7 @@ def compute_protein_rmsf(struct: Structure, logger: Logger, cutoff: float = 15.0
         return None
 
     return results
+
 
 def postprocess_flexibility_report_to_schema(raw_report: Dict[str, Any]) -> Dict[str, Any]:
     """

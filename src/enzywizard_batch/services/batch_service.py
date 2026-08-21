@@ -24,20 +24,20 @@ def _parse_float_triplet(value: str, parameter_name: str, logger: Logger) -> Lis
 
     try:
         return [float(x) for x in part_list]
-    except Exception:
-        logger.print(f"[ERROR] {parameter_name} must contain numeric values.")
+    except Exception as e:
+        logger.print(f"[ERROR] {parameter_name} must contain numeric values. Reason: {e}")
         return None
 
 
 def run_batch_service(
     cleaned_input_path: str | Path,
-    input_msa: str | Path,
+    input_msa: str | Path | None,
     substrate_names: str | None,
     output_dir: str | Path,
-    save_extra_outputs: bool = True,
+    save_extra_outputs: bool = False,
     cutoff_area: float = 10.0,
     minimize_energy: bool = True,
-    minimization_iteration: int = 1000,
+    minimization_iteration: int = 100,
     energy_force_field_file: str = "charmm36.xml",
     flexibility_cutoff: float = 15.0,
     n_modes: int = 20,
@@ -54,8 +54,8 @@ def run_batch_service(
     num_confs: int = 5,
     prune_rms: float = 0.5,
     max_docking_attempt_num: int = 20,
-    early_stop: bool = False,
-    exhaustiveness: int = 16,
+    early_stop: bool = True,
+    exhaustiveness: int = 8,
     cpu: int = 0,
     dock_min_rad: float = 1.8,
     dock_max_rad: float = 6.2,
@@ -78,7 +78,8 @@ def run_batch_service(
     min_residue_index_gap: int = 3,
 ) -> bool:
     cleaned_input_path = Path(cleaned_input_path)
-    input_msa = Path(input_msa)
+    has_msa = input_msa is not None and str(input_msa).strip() != ""
+    input_msa_path = Path(input_msa) if has_msa else None
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -95,7 +96,9 @@ def run_batch_service(
 
         has_substrate = isinstance(substrate_names, str) and substrate_names.strip() != ""
 
-        logger.print(f"[INFO] Batch processing started: cleaned_input_path={cleaned_input_path}, input_msa={input_msa}, substrate_names={substrate_names}")
+        logger.print(f"[INFO] Batch processing started: cleaned_input_path={cleaned_input_path}, input_msa={input_msa_path}, substrate_names={substrate_names}")
+        if not has_msa:
+            logger.print("[INFO] No MSA input detected. Conservation analysis and HMM output will be skipped.")
         if has_substrate:
             logger.print("[INFO] Substrate input detected. Full batch workflow will be executed.")
 
@@ -135,19 +138,22 @@ def run_batch_service(
             logger.print(f"[ERROR] Input cleaned protein file not found: {cleaned_input_path}")
             return False
 
-        if not file_exists(input_msa):
-            logger.print(f"[ERROR] Input MSA file not found: {input_msa}")
-            return False
+        if has_msa:
+            if input_msa_path is None or not file_exists(input_msa_path):
+                logger.print(f"[ERROR] Input MSA file not found: {input_msa_path}")
+                return False
 
         protein_name = get_stem(cleaned_input_path)
         if not check_filename_length(protein_name, logger):
             return False
         logger.print(f"[INFO] Protein name resolved: {protein_name}")
 
-        msa_name = get_stem(input_msa)
-        if not check_filename_length(msa_name, logger):
-            return False
-        logger.print(f"[INFO] MSA file name resolved: {msa_name}")
+        msa_name = None
+        if has_msa:
+            msa_name = get_stem(input_msa_path)
+            if not check_filename_length(msa_name, logger):
+                return False
+            logger.print(f"[INFO] MSA file name resolved: {msa_name}")
 
         if not validate_batch_parameter_ranges(
             logger=logger,
@@ -190,7 +196,7 @@ def run_batch_service(
 
         batch_result = run_batch_workflow(
             cleaned_input_path=cleaned_input_path,
-            input_msa=input_msa,
+            input_msa=input_msa_path,
             substrate_names=substrate_names,
             protein_name=protein_name,
             msa_name=msa_name,

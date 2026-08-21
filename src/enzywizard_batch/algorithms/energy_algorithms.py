@@ -7,7 +7,7 @@ from openmm.app import PDBFile, PDBxFile,Modeller,ForceField,NoCutoff,HBonds
 from ..utils.logging_utils import Logger
 
 
-def compute_energy_terms(struct: PDBFile | PDBxFile, logger: Logger, minimize_energy: bool = True, minimization_iteration:int = 1000,force_field_file="charmm36.xml") -> Dict[str, float] | None:
+def compute_energy_terms(struct: PDBFile | PDBxFile, logger: Logger, minimize_energy: bool = True, minimization_iteration:int = 100,force_field_file="charmm36.xml") -> Dict[str, float] | None:
 
 
     terms = [
@@ -116,6 +116,8 @@ def compute_energy_terms(struct: PDBFile | PDBxFile, logger: Logger, minimize_en
 
     return result
 
+
+
 def postprocess_energy_report_to_schema(raw_report: Dict[str, Any]) -> Dict[str, Any]:
     """
     Postprocess the raw EnzyWizard-Energy report into the schema-compliant report.
@@ -158,4 +160,3 @@ def generate_energy_report(energy_terms: Dict[str, float],logger: Logger) -> Dic
     return postprocess_energy_report_to_schema(
         raw_report=raw_report
     )
-

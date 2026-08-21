@@ -30,7 +30,7 @@ setup(
     python_requires=">=3.10",
     install_requires=[
         "biopython>=1.86",          # protein structure I/O, sequence handling
-        "numpy>=1.23.5",            # numerical backend
+        "numpy>=1.23.5,<2",         # numerical backend
         "rdkit>=2026.3.1",          # cheminformatics for substrates
         "openmm>=8.5.0",            # molecular mechanics (energy, minimization)
         "prody>=2.6.1",             # elastic network models (flexibility)

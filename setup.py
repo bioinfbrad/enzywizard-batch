@@ -14,7 +14,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="enzywizard-batch",
-    version=__version__,                     # currently "0.1.0", change in version.py
+    version=__version__,                     # dynamically read from version.py
     author="bioinfbrad",
     description=(
         "Run a complete EnzyWizard analysis workflow from a cleaned protein structure "
